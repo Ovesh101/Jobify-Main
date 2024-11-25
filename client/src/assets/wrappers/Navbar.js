@@ -35,7 +35,7 @@ const Wrapper = styled.nav`
     align-items: center;
   }
   @media (min-width: 992px) {
-    position: sticky;
+    position: static;
     top: 0;
     .nav-center {
       width: 90%;
