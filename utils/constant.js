@@ -17,5 +17,4 @@ export const JOB_TYPE = {
   };
   export const ROLE = {
     USER : 'user',
-    ADMIN : 'admin'
   };

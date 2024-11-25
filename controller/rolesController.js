@@ -1,49 +1,68 @@
 import Role from '../models/RoleModal.js'; // Import the Role model
 
-// Create a new role
 export const createRole = async (req, res) => {
-    try {
-      const { role, permissions } = req.body;
-  
-      console.log("role collection", req.body);
-  
-      // Check if the role already exists
-      const existingRole = await Role.findOne({ role });
-      if (existingRole) {
-        return res.status(400).json({ message: 'Role already exists' });
-      }
-  
-      // Create and save the new role
-      const newRole = new Role({
-        role,
-        permissions, // Permissions should be an array of strings
-      });
-  
-      await newRole.save();
-  
-      return res.status(201).json({
-        message: 'Role created successfully',
-        role: newRole,
-      });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Server error' });
+  try {
+    const { role, permissions } = req.body; // Extract `role` and `permissions` from the request body
+
+    console.log("Role data received:", req.body);
+
+    // Check if the role already exists
+    const existingRole = await Role.findOne({ role });
+    if (existingRole) {
+      return res.status(400).json({ message: 'Role already exists' });
     }
-  };
+
+    // Validate permissions (optional, depending on your needs)
+    if (permissions && typeof permissions !== "object") {
+      return res.status(400).json({ message: "Invalid permissions format" });
+    }
+
+    // Create and save the new role
+    const newRole = new Role({
+      role,
+      permissions: new Map(Object.entries(permissions)), // Convert permissions object to a Map
+    });
+
+    await newRole.save();
+
+    return res.status(201).json({
+      message: "Role created successfully",
+      role: newRole,
+    });
+  } catch (error) {
+    console.error("Error creating role:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
   
   
 
 // Get all roles
 export const getAllRoles = async (req, res) => {
-  try {
-    const roles = await Role.find({});
-
-    return res.status(200).json(roles);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error' });
-  }
-};
+    try {
+      // Fetch all roles from the database
+      const roles = await Role.find({});
+    
+      // Transform permissions from Map to plain object for easier readability in response
+      const transformedRoles = roles.map(role => {
+        const transformedRole = role.toObject(); // Convert Mongoose document to plain object
+        
+        // Convert the permissions Map to a plain object
+        if (transformedRole.permissions instanceof Map) {
+          transformedRole.permissions = Object.fromEntries(transformedRole.permissions.entries());
+        }
+        
+        return transformedRole;
+      });
+    
+      return res.status(200).json(transformedRoles);
+    } catch (error) {
+      console.error("Error fetching roles:", error);
+      return res.status(500).json({ message: 'Server error' });
+    }
+  };
+  
 
 // Get a single role by ID
 export const getRoleById = async (req, res) => {
@@ -63,61 +82,78 @@ export const getRoleById = async (req, res) => {
 
 // Edit a role by ID
 export const editRole = async (req, res) => {
-  try {
-    console.log("hello");
-    
-    const { role, permissions } = req.body;
+    try {
+      // Log for debugging purposes
+      console.log("Editing role...");
   
-    
-
-    // Find the role to update
-    const updated_role = await Role.findById(req.params.id);
-    if (!updated_role) {
-      return res.status(404).json({ message: 'Role not found' });
+      // Extract role and permissions from the request body
+      const { role, permissions } = req.body;
+  
+      // Validate role name (e.g., not empty or whitespace)
+      if (role && role.trim().length === 0) {
+        return res.status(400).json({ message: 'Role name cannot be empty' });
+      }
+  
+      // Find the role by ID
+      const updatedRole = await Role.findById(req.params.id);
+      
+      // If the role doesn't exist, return a 404 error
+      if (!updatedRole) {
+        return res.status(404).json({ message: 'Role not found' });
+      }
+  
+      // Update the role name if provided
+      if (role) {
+        updatedRole.role = role;
+      }
+  
+      // Update the permissions if provided
+      if (permissions) {
+        // Validate the permissions structure if needed
+        // Example: Check if permissions is an object
+        if (typeof permissions !== 'object' || Array.isArray(permissions)) {
+          return res.status(400).json({ message: 'Invalid permissions structure' });
+        }
+  
+        updatedRole.permissions = permissions;
+      }
+  
+      // Save the updated role to the database
+      await updatedRole.save();
+  
+      // Return a success response with the updated role
+      return res.status(200).json({
+        message: 'Role updated successfully',
+        updatedRole, // Return the updated role object
+      });
+    } catch (error) {
+      console.error("Error updating role:", error);
+      return res.status(500).json({ message: 'Server error' });
     }
-
-    // Update role name and permissions if provided
-    if (updated_role) {
-        updated_role.role = role;
-    }
-    if (permissions) {
-        updated_role.permissions = permissions;
-    }
-
-    await updated_role.save();
-
-    return res.status(200).json({
-      message: 'Role updated successfully',
-      updated_role,
-    });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error' });
-  }
-};
+  };
 
 
 
 export const deleteRole = async (req, res) => {
-  try {
-    // Validate the ID in the request
-    const { id } = req.params;
-    const ToDeleteRole = await Role.findById(id);
-    if (!ToDeleteRole) {
-      return res.status(400).json({ message: 'There is No role' });
+    try {
+      // Extract the role ID from the request parameters
+      const { id } = req.params;
+  
+      // Find the role by its ID
+      const roleToDelete = await Role.findById(id);
+  
+      // If the role doesn't exist, return an error response
+      if (!roleToDelete) {
+        return res.status(404).json({ message: 'Role not found' });
+      }
+  
+      // Attempt to delete the role by ID
+      const deletedRole = await Role.findByIdAndDelete(id);
+  
+      // If the deletion was successful, return a success message
+      return res.status(200).json({ message: 'Role deleted successfully' });
+    } catch (error) {
+      console.error("Error deleting role:", error);
+      return res.status(500).json({ message: 'Server error' });
     }
-
-    // Attempt to delete the role by ID
-    const deletedRole = await Role.findByIdAndDelete(id);
-
-    // If no role was found
-    if (!deletedRole) {
-      return res.status(404).json({ message: 'Role not found' });
-    }
-
-    return res.status(200).json({ message: 'Role deleted successfully' });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ message: 'Server error' });
-  }
-};
+  };

@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const RoleSchema = new mongoose.Schema(
@@ -6,17 +5,28 @@ const RoleSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
-     
+      unique:true,
+      trim: true, // Removes whitespace around the value
+      set: (value) => value.toLowerCase(), // Convert to lowercase before saving
     },
     permissions: {
-      type: [String], // Array of strings to store permission names or identifiers
-      default: [], // Default to an empty array if no permissions are assigned
+      type: Map, // Use a Map to define dynamic resources
+      of: new mongoose.Schema(
+        {
+          view: { type: Boolean, default: false },
+          create: { type: Boolean, default: false },
+          update: { type: Boolean, default: false },
+          delete: { type: mongoose.Schema.Types.Mixed, default: false }, 
+          // Mixed allows boolean or dynamic conditions (functions or objects)
+        },
+        { _id: false } // Prevents an _id field for nested permissions
+      ),
+      default: {}, // Default to an empty object
     },
   },
   {
-    timestamps: true, // Automatically add createdAt and updatedAt
+    timestamps: true, // Automatically add createdAt and updatedAt fields
   }
 );
 
-
-export default mongoose.model('Role', RoleSchema);
+export default mongoose.model("Role", RoleSchema);

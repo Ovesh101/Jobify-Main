@@ -10,6 +10,10 @@ import {
   Paper,
   IconButton,
   Tooltip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Modal,
   TextField,
   Button,
@@ -26,6 +30,8 @@ import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
 import CreateItemModal from "./CreateItemModal"; // Import CreateItemModal component
+import { useAdminContext } from "../Admin";
+import PermissionSystem from "../auth";
 
 const UsersData = () => {
   const [page, setPage] = useState(0);
@@ -37,6 +43,32 @@ const UsersData = () => {
   const [deleteUserId, setDeleteUserId] = useState(null); // Store the userId to delete
   const [roleData, setRoleData] = useState([]); // Array of roles
   const [createOpenModal, setCreateOpenModal] = useState(false); // State for Create Modal
+  const { user, isDarkTheme } = useAdminContext();
+
+  console.log("user data in users Data compo", user);
+
+  console.log("dark theme ", isDarkTheme);
+
+  // Permission System
+  const canCreateUsers = PermissionSystem.hasPermission(
+    user,
+    "users",
+    "create"
+  );
+  const canUpdateUsers = PermissionSystem.hasPermission(
+    user,
+    "users",
+    "update"
+  );
+  const canDeleteUsers = PermissionSystem.hasPermission(
+    user,
+    "users",
+    "delete"
+  );
+
+
+  console.log("user permission" , canCreateUsers , canUpdateUsers , canDeleteUsers);
+  
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -104,8 +136,12 @@ const UsersData = () => {
       await customFetch.delete(`/info/users/${userId}`);
       setUsers((prevUsers) => prevUsers.filter((user) => user._id !== userId));
       setIsDeleteConfirm(false); // Close the confirmation
+      toast.success("User deleted successfully!"); // Display success message
     } catch (error) {
       console.error("Error deleting user:", error);
+      toast.error(
+        error.response?.data?.msg || "Failed to delete user. Please try again."
+      ); // Display error message
     }
   };
 
@@ -116,9 +152,12 @@ const UsersData = () => {
       const response = await customFetch.post("/info/users", formData);
       setUsers((prevUsers) => [...prevUsers, response.data.user]);
       setCreateOpenModal(false); // Close modal after creation
+      toast.success("User created successfully!"); // Show success toast
     } catch (error) {
-      toast.error("Error creating user");
       console.error("Error creating user:", error);
+      toast.error(
+        error.response?.data?.msg || "Failed to create user. Please try again."
+      ); // Show error toast
     }
   };
 
@@ -131,14 +170,16 @@ const UsersData = () => {
     <div className="mb-10">
       <h2 className="text-2xl font-semibold mb-4 text-gray-800">Users Data</h2>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => setCreateOpenModal(true)} // Open Create Modal
-        sx={{ marginBottom: "20px" }}
-      >
-        Create User
-      </Button>
+      {canCreateUsers && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setCreateOpenModal(true)} // Open Create Modal
+          sx={{ marginBottom: "20px" }}
+        >
+          Create User
+        </Button>
+      )}
 
       <TableContainer component={Paper} className="shadow-lg rounded-md">
         <Table>
@@ -163,17 +204,17 @@ const UsersData = () => {
             ) : (
               users
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((user) => (
+                .map((SingleUser) => (
                   <TableRow
                     key={user.id}
                     hover
                     className="transition duration-300 ease-in-out"
                   >
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.lastName}</TableCell>
-                    <TableCell>{user.location}</TableCell>
-                    <TableCell>{user.role}</TableCell>
+                    <TableCell>{SingleUser.name}</TableCell>
+                    <TableCell>{SingleUser.email}</TableCell>
+                    <TableCell>{SingleUser.lastName}</TableCell>
+                    <TableCell>{SingleUser.location}</TableCell>
+                    <TableCell>{SingleUser.role}</TableCell>
                     <TableCell>
                       <span
                         className={`${
@@ -182,29 +223,86 @@ const UsersData = () => {
                             : "text-red-500"
                         } font-semibold`}
                       >
-                        {user.status}
+                        {SingleUser.status}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Tooltip title="Edit User">
-                        <IconButton
-                          color="primary"
-                          onClick={() => handleEditUser(user)}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete User">
-                        <IconButton
-                          color="error"
-                          onClick={() => {
-                            setDeleteUserId(user._id);
-                            setIsDeleteConfirm(true);
-                          }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
+                      {(() => {
+                        // Check if the logged-in user is superadmin
+                        const isCurrentUserSuperAdmin =
+                          user.role === "superadmin";
+                        // Check if the displayed user is superadmin
+                        const isTargetUserSuperAdmin =
+                          SingleUser.role === "superadmin";
+
+                        // If the logged-in user is superadmin, allow editing/deleting their own data
+                        if (
+                          isCurrentUserSuperAdmin &&
+                          user._id === SingleUser._id
+                        ) {
+                          return (
+                            <>
+                              <Tooltip title="Edit User">
+                                <IconButton
+                                  color="primary"
+                                  onClick={() => handleEditUser(user)}
+                                >
+                                  <EditIcon />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Delete User">
+                                <IconButton
+                                  color="error"
+                                  onClick={() => {
+                                    setDeleteUserId(user._id);
+                                    setIsDeleteConfirm(true);
+                                  }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Tooltip>
+                            </>
+                          );
+                        }
+
+                        // If the logged-in user is not superadmin, hide options for superadmin data
+                        if (
+                          !isCurrentUserSuperAdmin &&
+                          isTargetUserSuperAdmin
+                        ) {
+                          return <span>Settings Protected</span>;
+                        }
+
+                        // For all other cases, follow normal permissions
+                        return (
+                          <>
+                            {canUpdateUsers ? (
+                              <Tooltip title="Edit User">
+                                <IconButton
+                                  color="primary"
+                                  onClick={() => handleEditUser(SingleUser)}
+                                >
+                                  <EditIcon />
+                                </IconButton>
+                              </Tooltip>
+                            ) : ""}
+
+                            {canDeleteUsers ? (
+                              <Tooltip title="Delete User">
+                                <IconButton
+                                  color="error"
+                                  onClick={() => {
+                                    setDeleteUserId(SingleUser._id);
+                                    setIsDeleteConfirm(true);
+                                  }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Tooltip>
+                            ) : ""}
+                          </>
+                        );
+                      })()}
                     </TableCell>
                   </TableRow>
                 ))
@@ -296,13 +394,20 @@ const UsersData = () => {
               onChange={handleRoleChange}
               label="Role"
             >
-              {roleData.map((role) => (
-                <MenuItem key={role._id} value={role.role}>
-                  {role.role}
-                </MenuItem>
-              ))}
+              {roleData.map((role) => {
+                // Check if the current role is superadmin and restrict its visibility
+                if (role.role === "superadmin" && user.role !== "superadmin") {
+                  return null; // Don't show the superadmin option for non-superadmins
+                }
+                return (
+                  <MenuItem key={role._id} value={role.role}>
+                    {role.role}
+                  </MenuItem>
+                );
+              })}
             </Select>
           </FormControl>
+
           <FormControl fullWidth margin="normal">
             <InputLabel>Status</InputLabel>
             <Select
@@ -330,48 +435,43 @@ const UsersData = () => {
         </Box>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
-      {isDeleteConfirm && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            bgcolor: "background.paper",
-            borderRadius: "8px",
-            boxShadow: 24,
-            p: 4,
-            width: "300px",
-            textAlign: "center",
-          }}
-        >
-          <Typography variant="h6" sx={{ color: "black" }} gutterBottom>
-            Are you sure you want to delete this user?
+      <Dialog
+        open={isDeleteConfirm}
+        onClose={() => setIsDeleteConfirm(false)}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography
+            variant="body1"
+            color="textSecondary"
+            id="delete-dialog-description"
+          >
+            Are you sure you want to delete this role? This action cannot be
+            undone.
           </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsDeleteConfirm(false)} color="primary">
+            Cancel
+          </Button>
           <Button
-            variant="contained"
-            color="error"
             onClick={() => handleDeleteUser(deleteUserId)}
-            sx={{ mr: 2 }}
+            color="secondary"
+            variant="contained"
           >
-            Yes
+            Yes, delete
           </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={() => setIsDeleteConfirm(false)}
-          >
-            No
-          </Button>
-        </Box>
-      )}
+        </DialogActions>
+      </Dialog>
 
       {/* Create User Modal */}
       <CreateItemModal
         open={createOpenModal}
         onClose={() => setCreateOpenModal(false)}
         onSubmit={handleCreateUser}
+        type="User"
       />
     </div>
   );

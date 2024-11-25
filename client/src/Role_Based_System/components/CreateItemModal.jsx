@@ -2,19 +2,45 @@ import React, { useState } from "react";
 import {
   Modal,
   Button,
-  TextField,
   Box,
   Typography,
-  FormGroup,
-  FormControlLabel,
+  Table,
+  TextField,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Checkbox,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  FormControlLabel,
 } from "@mui/material";
-import { toast } from "react-toastify";
 
 const CreateItemModal = ({ open, onClose, type, onSubmit }) => {
-  const availablePermissions = ["create_user", "edit_user", "delete_user"]; // Sample permissions list
+  const availablePermissions = ["users", "roles"]; // Resources (columns)
 
   const getInitialFormState = () => {
+    if (type === "Role") {
+      // Initialize permissions for all available resources
+      const permissions = availablePermissions.reduce((acc, resource) => {
+        acc[resource] = {
+          view: false,
+          create: false,
+          update: false,
+          delete: false,
+        };
+        return acc;
+      }, {});
+
+      return {
+        role: "",
+        permissions,
+      };
+    }
+
     if (type === "User") {
       return {
         name: "",
@@ -24,18 +50,12 @@ const CreateItemModal = ({ open, onClose, type, onSubmit }) => {
         location: "",
       };
     }
-    if (type === "Role") {
-      return {
-        role: "",
-        permissions: [],
-      };
-    }
+
     return {};
   };
 
   const [formData, setFormData] = useState(getInitialFormState());
 
-  // Handle form field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
@@ -44,27 +64,22 @@ const CreateItemModal = ({ open, onClose, type, onSubmit }) => {
     }));
   };
 
-  // Handle checkbox selection
-  const handlePermissionChange = (permission) => {
+  // Handle checkbox selection for resource actions
+  const handlePermissionChange = (resource, action) => {
     setFormData((prevData) => {
-      const permissions = prevData.permissions.includes(permission)
-        ? prevData.permissions.filter((perm) => perm !== permission)
-        : [...prevData.permissions, permission];
-      return { ...prevData, permissions };
+      const updatedPermissions = { ...prevData.permissions };
+      updatedPermissions[resource][action] =
+        !updatedPermissions[resource][action];
+      return { ...prevData, permissions: updatedPermissions };
     });
   };
 
-  // Submit form data
+  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      await onSubmit(formData);
-      toast.success(`${type} created successfully!`);
-      setFormData(getInitialFormState());
-      onClose();
-    } catch (error) {
-      toast.error(`Error creating ${type}: ${error.message}`);
-    }
+    onSubmit(formData);
+    setFormData(getInitialFormState());
+    onClose();
   };
 
   return (
@@ -90,98 +105,21 @@ const CreateItemModal = ({ open, onClose, type, onSubmit }) => {
           sx={{
             fontWeight: "bold",
             mb: 2,
-            color: "text.primary",
             textAlign: "center",
+            color: "black",
           }}
         >
           Create {type}
         </Typography>
 
         <form onSubmit={handleSubmit}>
-          {/* User Fields */}
-          {type === "User" && (
-            <>
-              <Box mb={3}>
-                <TextField
-                  label="Name"
-                  variant="outlined"
-                  fullWidth
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  required
-                  sx={{
-                    marginBottom: 2,
-                    "& .MuiInputLabel-root": {
-                      color: "text.secondary",
-                    },
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: "gray",
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "primary.main",
-                      },
-                    },
-                  }}
-                />
-                <TextField
-                  label="Email"
-                  variant="outlined"
-                  fullWidth
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                  sx={{
-                    marginBottom: 2,
-                    "& .MuiInputLabel-root": {
-                      color: "text.secondary",
-                    },
-                  }}
-                />
-                <TextField
-                  label="Password"
-                  variant="outlined"
-                  fullWidth
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                  sx={{
-                    marginBottom: 2,
-                  }}
-                />
-                <TextField
-                  label="Last Name"
-                  variant="outlined"
-                  fullWidth
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleChange}
-                  required
-                  sx={{
-                    marginBottom: 2,
-                  }}
-                />
-                <TextField
-                  label="Location"
-                  variant="outlined"
-                  fullWidth
-                  name="location"
-                  value={formData.location}
-                  onChange={handleChange}
-                  required
-                />
-              </Box>
-            </>
-          )}
-
           {/* Role Fields */}
           {type === "Role" && (
             <>
               <Box mb={3}>
+                <Typography variant="subtitle1" sx={{ mb: 1, color: "black" }}>
+                  Role Name
+                </Typography>
                 <TextField
                   label="Role Name"
                   variant="outlined"
@@ -190,33 +128,125 @@ const CreateItemModal = ({ open, onClose, type, onSubmit }) => {
                   value={formData.role}
                   onChange={handleChange}
                   required
-                  sx={{
-                    marginBottom: 2,
-                  }}
+                  sx={{ marginBottom: 2 }}
                 />
-                <Typography variant="subtitle1" sx={{ mb: 1 , color:"black" }}>
+
+                <Typography variant="subtitle1" sx={{ mb: 1, color: "black" }}>
                   Permissions
                 </Typography>
-                <FormGroup sx={{ display: "grid", gap: 1 }}>
-                  {availablePermissions.map((permission) => (
-                    <FormControlLabel
-                      key={permission}
-                      control={
-                        <Checkbox
-                          checked={formData.permissions.includes(permission)}
-                          onChange={() => handlePermissionChange(permission)}
-                        />
-                      }
-                      label={permission}
-                      sx={{
-                        "& .MuiTypography-root": {
-                          fontSize: "0.875rem", // Custom font size
-                          color: "text.primary", // Set the color to the primary text color
-                        },
-                      }}
-                    />
-                  ))}
-                </FormGroup>
+
+                {/* Permissions Table */}
+                <TableContainer>
+                  <Table >
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Resource</TableCell>
+                        <TableCell align="center">View</TableCell>
+                        <TableCell align="center">Create</TableCell>
+                        <TableCell align="center">Update</TableCell>
+                        <TableCell align="center">Delete</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {availablePermissions.map((resource) => (
+                        <TableRow key={resource}>
+                          <TableCell>{resource}</TableCell>
+                          {["view", "create", "update", "delete"].map(
+                            (action) => (
+                              <TableCell key={action} align="center">
+                                <Checkbox
+                                  checked={
+                                    formData.permissions[resource][action]
+                                  }
+                                  onChange={() =>
+                                    handlePermissionChange(resource, action)
+                                  }
+                                />
+                              </TableCell>
+                            )
+                          )}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Box>
+            </>
+          )}
+
+          {/* User Fields */}
+          {type === "User" && (
+            <>
+              <Box mb={3}>
+                <Typography variant="subtitle1" sx={{ mb: 1, color: "black" }}>
+                  First Name
+                </Typography>
+                <TextField
+                  label="Name"
+                  variant="outlined"
+                  fullWidth
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  sx={{ marginBottom: 2 }}
+                />
+
+                <Typography variant="subtitle1" sx={{ mb: 1, color: "black" }}>
+                  Last Name
+                </Typography>
+                <TextField
+                  label="Last Name"
+                  variant="outlined"
+                  fullWidth
+                  name="lastName"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  required
+                  sx={{ marginBottom: 2 }}
+                />
+                <Typography variant="subtitle1" sx={{ mb: 1, color: "black" }}>
+                  Email
+                </Typography>
+                <TextField
+                  label="Email"
+                  variant="outlined"
+                  fullWidth
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  sx={{ marginBottom: 2 }}
+                />
+                <Typography variant="subtitle1" sx={{ mb: 1, color: "black" }}>
+                  Password
+                </Typography>
+                <TextField
+                  label="Password"
+                  variant="outlined"
+                  fullWidth
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  sx={{ marginBottom: 2 }}
+                />
+
+                <Typography variant="subtitle1" sx={{ mb: 1, color: "black" }}>
+                  Location
+                </Typography>
+                <TextField
+                  label="Location"
+                  variant="outlined"
+                  fullWidth
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  required
+                  sx={{ marginBottom: 2 }}
+                />
+
+
               </Box>
             </>
           )}
@@ -230,9 +260,7 @@ const CreateItemModal = ({ open, onClose, type, onSubmit }) => {
               fullWidth
               sx={{
                 padding: "12px 0",
-                "&:hover": {
-                  backgroundColor: "primary.dark",
-                },
+                "&:hover": { backgroundColor: "primary.dark" },
               }}
             >
               Create {type}

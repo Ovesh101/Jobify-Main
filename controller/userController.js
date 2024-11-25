@@ -8,8 +8,7 @@ import { hashPassword, comparePassword } from "../utils/passwordUtils.js";
 
 const register = async (req, res) => {
   req.body.password = await hashPassword(req.body.password);
-  const isFirstAccount = (await User.countDocuments()) === 0;
-  req.body.role = isFirstAccount ? "admin" : "user";
+  
   const user = await User.create(req.body);
   res.status(StatusCodes.OK).json({ msg: "Register Successfully" });
 };
@@ -18,8 +17,11 @@ const login = async (req, res) => {
   // check if user exists
   // check if password is correct
 
+  console.log("body data" , req.body);
+  
+
   const user = await User.findOne({ email: req.body.email });
-  console.log(user);
+
   
   if (!user) throw new UnauthenticatedError("Invalid Email..");
 
@@ -38,7 +40,7 @@ const login = async (req, res) => {
     secure: process.env.NODE_ENV === "production",
   });
 
-  res.status(StatusCodes.OK).json({ msg: "Login Successfully " });
+  res.status(StatusCodes.OK).json({ user:user , msg: "Login Successfully " });
 };
 
 export const logout = async (req, res) => {
@@ -46,7 +48,7 @@ export const logout = async (req, res) => {
     httpOnly: true,
     expires: new Date(Date.now()),
   });
-  res.status(StatusCodes.OK).json({ msg: "User Logout Successfully" });
+  res.status(StatusCodes.OK).json({  msg: "User Logout Successfully" });
 };
 
 export { register, login };

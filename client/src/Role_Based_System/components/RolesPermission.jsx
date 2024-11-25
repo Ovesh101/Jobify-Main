@@ -11,21 +11,27 @@ import {
   IconButton,
   Tooltip,
   Modal,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   TextField,
   Button,
+  Divider,
   Box,
   Typography,
   Alert,
   FormControl,
   FormControlLabel,
-  RadioGroup,
-  Radio,
   Checkbox,
 } from "@mui/material";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
 import CreateItemModal from "./CreateItemModal"; // Reusing CreateItemModal
+
+import PermissionSystem from "../auth";
+import { useAdminContext } from "../Admin";
 
 const RolesPermission = () => {
   const [roles, setRoles] = useState([]);
@@ -37,8 +43,23 @@ const RolesPermission = () => {
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
   const [deleteRoleId, setDeleteRoleId] = useState(null);
 
-  // Permission options
-  const permissionsList = ["create_user", "edit_user" , "delete_user"];
+  const { user } = useAdminContext(); // Access the user from context
+
+  const canCreateRoles = PermissionSystem.hasPermission(
+    user,
+    "roles",
+    "create"
+  );
+  const canUpdateRoles = PermissionSystem.hasPermission(
+    user,
+    "roles",
+    "update"
+  );
+  const canDeleteRoles = PermissionSystem.hasPermission(
+    user,
+    "roles",
+    "delete"
+  );
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -64,6 +85,8 @@ const RolesPermission = () => {
   };
 
   const handleEditRole = (role) => {
+    console.log("role table info", role);
+
     setSelectedRole(role);
     setOpenModal(true);
   };
@@ -72,63 +95,116 @@ const RolesPermission = () => {
     console.log(selectedRole);
 
     try {
+      // Send the PATCH request to update the role
       const response = await customFetch.patch(
         `/roles/${selectedRole._id}`,
         selectedRole
       );
+
       console.log(response.data);
 
+      // Show success toast if the request is successful
       toast.success("Updated Role Successfully");
+
+      // Update the roles in the state after the role is updated
       setRoles((prevRoles) =>
         prevRoles.map((role) =>
           role._id === selectedRole._id ? { ...role, ...selectedRole } : role
         )
       );
+
+      // Close the modal and reset the selectedRole state
       setOpenModal(false);
       setSelectedRole(null);
     } catch (error) {
-      toast.error("Failed to update role");
+      // Check if the error contains a response with a message
+      const errorMessage =
+        error.response?.data?.message ||
+        "An error occurred while updating the role";
+      toast.error(errorMessage);
       console.error("Error saving role:", error);
     }
   };
 
   const handleDeleteRole = async (roleId) => {
     try {
-      await customFetch.delete(`/roles/${roleId}`);
+      // Perform the DELETE request to delete the role
+      const response = await customFetch.delete(`/roles/${roleId}`);
+
+      // Handle success: filter out the deleted role from the state
       setRoles((prevRoles) => prevRoles.filter((role) => role._id !== roleId));
+
+      // Show success toast message
+      toast.success("Role deleted successfully!");
+
+      // Close the confirmation dialog
       setIsDeleteConfirm(false);
     } catch (error) {
+      // Handle errors and show error toast message
+      const errorMessage =
+        error.response?.data?.message ||
+        "An error occurred while deleting the role";
+      toast.error(errorMessage);
       console.error("Error deleting role:", error);
     }
   };
 
   const handleCreateRole = async (formData) => {
-    console.log("form data in role", formData);
-
     try {
+      console.log("Form data in role:", formData);
+
       const response = await customFetch.post("/roles", formData);
+
+      console.log("Successfully created role:", response.data);
+
+      toast.success(response.data.message);
+
       setRoles((prevRoles) => [...prevRoles, response.data.role]);
+
       setCreateOpenModal(false);
     } catch (error) {
-      toast.error("Error creating role");
-      console.error("Error creating role:", error);
+      const errorMessage =
+        error.response?.data?.message || "Something went wrong!";
+
+      // Show error toast message
+      toast.error(errorMessage);
+
+      // Log error for debugging
+      console.error("Error occurred while creating role:", errorMessage);
     }
   };
 
+  const handlePermissionChange = (resource, permission, checked) => {
+    setSelectedRole((prev) => ({
+      ...prev,
+      permissions: {
+        ...prev.permissions,
+        [resource]: {
+          ...prev.permissions[resource],
+          [permission]: checked,
+        },
+      },
+    }));
+  };
+
   return (
-    <div className="mb-10">
+    <div className="mb-10  ">
       <h2 className="text-2xl font-semibold mb-4 text-gray-800">
         Roles & Permissions
       </h2>
 
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => setCreateOpenModal(true)}
-        sx={{ marginBottom: "20px" }}
-      >
-        Create Role
-      </Button>
+      {canCreateRoles ? (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setCreateOpenModal(true)}
+          sx={{ marginBottom: "20px" }}
+        >
+          Create Role
+        </Button>
+      ) : (
+        ""
+      )}
 
       <TableContainer component={Paper} className="shadow-lg rounded-md">
         <Table>
@@ -147,32 +223,94 @@ const RolesPermission = () => {
                   <TableRow
                     key={role._id}
                     hover
-                    className="transition duration-300 ease-in-out "
+                    className="transition duration-300 ease-in-out"
                   >
+                    {/* Role Name */}
                     <TableCell>{role.role}</TableCell>
+
+                    {/* Permissions */}
                     <TableCell>
-                      {role.permissions && role.permissions.join(", ")}
+                      <div>
+                        {/* Loop through the permissions object keys */}
+                        {role.permissions &&
+                          Object.keys(role.permissions).map((section) => (
+                            <div key={section} className="mb-4">
+                              {/* Resource Name */}
+                              <h4 className="font-semibold mb-2 text-lg">
+                                {section}
+                              </h4>
+
+                              {/* Display permissions using Box (Flexbox) */}
+                              <Box display="flex" flexWrap="wrap">
+                                {/* Check if the role is "superadmin" */}
+                                {role.role === "superadmin" ? (
+                                  <div>All Permissions</div>
+                                ) : (
+                                  // Otherwise, map through the permissions
+                                  Object.keys(role.permissions[section]).map(
+                                    (perm) => (
+                                      <Box
+                                        key={perm}
+                                        display="flex"
+                                        alignItems="center"
+                                        mr={4}
+                                      >
+                                        <Checkbox
+                                          checked={
+                                            role.permissions[section][perm]
+                                          }
+                                          disabled
+                                          color="primary"
+                                          inputProps={{
+                                            "aria-label": `${perm} permission`,
+                                          }}
+                                        />
+                                        <span>{perm}</span>
+                                      </Box>
+                                    )
+                                  )
+                                )}
+                              </Box>
+                            </div>
+                          ))}
+                      </div>
                     </TableCell>
+
+                    {/* Actions */}
                     <TableCell>
-                      <Tooltip title="Edit Role">
-                        <IconButton
-                          color="primary"
-                          onClick={() => handleEditRole(role)}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete Role">
-                        <IconButton
-                          color="error"
-                          onClick={() => {
-                            setDeleteRoleId(role._id);
-                            setIsDeleteConfirm(true);
-                          }}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
+                      {/* Check if role is superadmin */}
+                      {role.role === "superadmin" ? (
+                        <span>Settings are protected</span>
+                      ) : (
+                        <>
+                          {/* Conditionally show Edit button based on canUpdateUsers */}
+                          {canUpdateRoles && (
+                            <Tooltip title="Edit Role">
+                              <IconButton
+                                color="primary"
+                                onClick={() => handleEditRole(role)}
+                              >
+                                <EditIcon />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+
+                          {/* Always show Delete button for non-superadmin roles */}
+                          {canDeleteRoles && (
+                          <Tooltip title="Delete Role">
+                            <IconButton
+                              color="error"
+                              onClick={() => {
+                                setIsDeleteConfirm(true);
+                                setDeleteRoleId(role._id);
+                              }}
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </Tooltip>
+                          )}
+                        </>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))
@@ -185,6 +323,8 @@ const RolesPermission = () => {
             )}
           </TableBody>
         </Table>
+
+        {/* Pagination Controls */}
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
@@ -197,7 +337,6 @@ const RolesPermission = () => {
         />
       </TableContainer>
 
-      {/* Edit Modal */}
       <Modal open={openModal} onClose={() => setOpenModal(false)}>
         <Box
           sx={{
@@ -212,10 +351,11 @@ const RolesPermission = () => {
             width: "400px",
           }}
         >
-          <Typography variant="h6" sx={{color:"black"}} gutterBottom>
+          <Typography variant="h6" sx={{ color: "black" }} gutterBottom>
             Edit Role
           </Typography>
 
+          {/* Role Name Field */}
           <TextField
             label="Role Name"
             variant="outlined"
@@ -227,31 +367,60 @@ const RolesPermission = () => {
             }
           />
 
-          <Typography variant="subtitle1" sx={{ mt: 2 , color:"black" }}>
+          <Divider sx={{ my: 2 }} />
+
+          <Typography variant="subtitle1" sx={{ color: "black" }}>
             Permissions
           </Typography>
-          {permissionsList.map((permission) => (
-            <FormControl key={permission} sx={{color:"black"}} margin="normal">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={selectedRole?.permissions?.includes(permission)}
-                    onChange={(e) => {
-                      const isChecked = e.target.checked;
-                      setSelectedRole((prev) => ({
-                        ...prev,
-                        permissions: isChecked
-                          ? [...prev.permissions, permission]
-                          : prev.permissions.filter((p) => p !== permission),
-                      }));
-                    }}
-                  />
-                }
-                label={permission}
-              />
-            </FormControl>
-          ))}
 
+          {/* Permissions List - Iterating over resources */}
+          {Object.keys(selectedRole?.permissions || {}).map((resource) => (
+            <Box key={resource} sx={{ mb: 2 }}>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", mb: 1, color: "black" }}
+              >
+                {resource.charAt(0).toUpperCase() + resource.slice(1)}
+              </Typography>
+
+              {/* Permissions in a Row using Box with flex */}
+              <Box sx={{ display: "flex", gap: 2 }}>
+                {Object.keys(selectedRole.permissions[resource]).map(
+                  (permission) => (
+                    <FormControl
+                      key={permission}
+                      fullWidth
+                      sx={{ mb: 1, color: "black" }}
+                    >
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={
+                              selectedRole.permissions[resource][permission]
+                            }
+                            onChange={(e) =>
+                              handlePermissionChange(
+                                resource,
+                                permission,
+                                e.target.checked
+                              )
+                            }
+                          />
+                        }
+                        label={
+                          permission.charAt(0).toUpperCase() +
+                          permission.slice(1)
+                        }
+                      />
+                    </FormControl>
+                  )
+                )}
+              </Box>
+            </Box>
+          ))}
+          <Divider sx={{ my: 2 }} />
+
+          {/* Save Changes Button */}
           <Button
             onClick={handleSaveRole}
             variant="contained"
@@ -264,32 +433,36 @@ const RolesPermission = () => {
         </Box>
       </Modal>
 
-      {/* Delete Confirmation */}
-      {isDeleteConfirm && (
-        <Alert
-          severity="warning"
-          action={
-            <>
-              <Button
-                color="secondary"
-                size="medium"
-                onClick={() => handleDeleteRole(deleteRoleId)}
-              >
-                Yes, delete
-              </Button>
-              <Button
-                color="primary"
-                size="small"
-                onClick={() => setIsDeleteConfirm(false)}
-              >
-                Cancel
-              </Button>
-            </>
-          }
-        >
-          Are you sure you want to delete this role?
-        </Alert>
-      )}
+      <Dialog
+        open={isDeleteConfirm}
+        onClose={() => setIsDeleteConfirm(false)}
+        aria-labelledby="delete-dialog-title"
+        aria-describedby="delete-dialog-description"
+      >
+        <DialogTitle id="delete-dialog-title">Confirm Deletion</DialogTitle>
+        <DialogContent>
+          <Typography
+            variant="body1"
+            color="textSecondary"
+            id="delete-dialog-description"
+          >
+            Are you sure you want to delete this role? This action cannot be
+            undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setIsDeleteConfirm(false)} color="primary">
+            Cancel
+          </Button>
+          <Button
+            onClick={() => handleDeleteRole(deleteRoleId)}
+            color="secondary"
+            variant="contained"
+          >
+            Yes, delete
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Create Role Modal */}
       <CreateItemModal

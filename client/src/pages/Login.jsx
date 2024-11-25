@@ -14,9 +14,16 @@ export const action = async ({request})=>{
   }
 
   try {
-    await customFetch.post("/users/login" , data);
+   const response =  await customFetch.post("/users/login" , data);
+   console.log(response);
+   
     toast.success("Login Successfully")
-    return redirect('/dashboard')
+    if (response?.data?.user?.role === 'admin') {
+      return redirect('/admin/dashboard/users'); // Redirect admins to the default admin route
+    }
+
+    // Redirect non-admins to a different dashboard or homepage
+    return redirect('/dashboard');
   } catch (error) {
     toast.error(error?.response?.data?.msg)
     return error
@@ -28,24 +35,6 @@ export const action = async ({request})=>{
 
 
 const Login = () => {
-
-  const navigate = useNavigate();
-  const loginDemoUser = async()=>{
-    const data = {
-      email : "test@test.com",
-      password : "secret123"
-
-    };
-    try {
-      await customFetch.post("/users/login" , data);
-      toast.success("Take a Test Drive")
-      return navigate("/dashboard")
-
-    } catch (error) {
-      toast.error(error?.response?.data?.msg)
-      return error  
-    }
-  }
   const errors = useActionData();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === 'submitting'
@@ -58,10 +47,15 @@ const Login = () => {
         <FormRow type='email' name='email' />
         <FormRow type='password' name='password' />
         <button type='submit' className='btn btn-block' disabled = {isSubmitting}>{isSubmitting ? 'Logging' : "Login"}</button>
-        <button type='button' className='btn btn-block' onClick={loginDemoUser} >Explore The App</button>
+      
         <p>
           Not a member yet?
           <Link to='/register' className='member-btn'>Register</Link>
+          <div className='text-[12px]' >
+          <Link to='/admin/login' className='member-btn'>Admin Login</Link>
+          </div>
+
+         
         </p>
       </Form>
     </Wrapper>

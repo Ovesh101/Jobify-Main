@@ -1,109 +1,168 @@
+import {
+  Error,
+  Register,
+  Login,
+  Landing,
+  DashboardLayout,
+  Stats,
+  AllJobs,
+  Profile,
+  Admin,
+  AddJob,
+  EditJob,
+} from "./pages";
+import AdminLogin from "./Role_Based_System/components/AdminLogin.jsx";
 
-import {Error , Register , Login , Landing , DashboardLayout, Stats, AllJobs, Profile, Admin, AddJob , EditJob} from "./pages"
+import HomeLayout from "./pages/HomeLayout.jsx";
+import PermissionSystem from "./Role_Based_System/auth.js";
+import ProtectedRoute from "./Role_Based_System/components/ProtectedRoute.jsx";
 
-import HomeLayout from './pages/HomeLayout.jsx'
+import {
+  Navigate,
+  RouterProvider,
+  createBrowserRouter,
+} from "react-router-dom";
 
+import { action as registerAction } from "./pages/Register";
+import { action as loginAction } from "./pages/Login";
+import { action as adminLoginAction } from "./Role_Based_System/components/AdminLogin.jsx";
+import { action as JobdataAction } from "./pages/AddJob";
+import { loader as loadDashboard } from "./pages/DashboardLayout";
+import { loader as allJobsLoader } from "./pages/AllJobs";
+import { loader as editJobLoader } from "./pages/EditJob";
+import AdminLayout, {
+  loader as adminLoader,
+} from "./Role_Based_System/Admin.jsx";
+import { action as editJobAction } from "./pages/EditJob";
+import { action as deleteJobAction } from "./pages/DeleteJob";
+import { action as profileAction } from "./pages/Profile";
+import { loader as statsLoader } from "./pages/Stats";
+import { useEffect, useState } from "react";
+import UsersData from "./Role_Based_System/components/UsersData.jsx";
+import RolesPermission from "./Role_Based_System/components/RolesPermission.jsx";
+import { AuthProvider } from "./Role_Based_System/context/useUser.jsx";
 
-import { RouterProvider, createBrowserRouter } from 'react-router-dom'
-
-import { action as registerAction } from "./pages/Register"
-import {action as loginAction} from "./pages/Login"
-import {action as JobdataAction} from "./pages/AddJob"
-import { loader as loadDashboard } from "./pages/DashboardLayout"
-import {loader as allJobsLoader} from "./pages/AllJobs"
-import {loader  as editJobLoader} from "./pages/EditJob"
-import {loader  as adminLoader} from "./pages/Admin"
-import {action as editJobAction}  from "./pages/EditJob"
-import {action as deleteJobAction}  from "./pages/DeleteJob"
-import {action as profileAction}  from "./pages/Profile"
-import {loader as statsLoader} from "./pages/Stats"
-
-const checkDefaultTheme = ()=>{
-  const isDarkTheme = localStorage.getItem('darkTheme')  === 'true';
-  document.body.classList.toggle('dark-theme' , isDarkTheme);
-  return isDarkTheme
-}
+const checkDefaultTheme = () => {
+  const isDarkTheme = localStorage.getItem("darkTheme") === "true";
+  document.body.classList.toggle("dark-theme", isDarkTheme);
+  return isDarkTheme;
+};
 
 const isDarkThemeEnabled = checkDefaultTheme();
 
-
 const router = createBrowserRouter([
   {
-    path : '/',
+    path: "/",
     element: <HomeLayout />,
-    errorElement : <Error />,
-    children : [
+    errorElement: <Error />,
+    children: [
       {
-        index : true,
-        element : < Landing />
+        index: true,
+        element: <Landing />,
       },
       {
-        path : '/register',
-        element : <Register />,
-        action: registerAction
-        
+        path: "/register",
+        element: <Register />,
+        action: registerAction,
       },
       {
-        path : '/login',
-        element : <Login />,
-        action : loginAction
+        path: "/login",
+        element: <Login />,
+        action: loginAction,
       },
       {
-        path : '/dashboard',
-        element : <DashboardLayout isDarkThemeEnabled = {isDarkThemeEnabled} />,
-        loader : loadDashboard ,
-        children : [
+        path: "/admin/login",
+        element: <AdminLogin />,
+        action: adminLoginAction,
+      },
+      {
+        path: "/admin/dashboard",
+        element: (
+          <AuthProvider>
+            <AdminLayout isDarkThemeEnabled={isDarkThemeEnabled} />
+          </AuthProvider>
+        ),
+        loader: adminLoader, // Ensure this loader verifies the user's admin role
+        children: [
           {
-            index : true,
-            element : <AddJob />,
-            action : JobdataAction
+            path: "users", // Accessible at /admin/dashboard/users
+            element: (
+              <ProtectedRoute resource="users" action="view">
+                <UsersData />
+              </ProtectedRoute>
+            ),
+          },
+          {
+            path: "roles", // Accessible at /admin/dashboard/roles
+            element: (
+              <ProtectedRoute resource="roles" action="view">
+                <RolesPermission />
+              </ProtectedRoute>
+            ),
+          },
+        ],
+      },
+      {
+        path: "/dashboard",
+        element: <DashboardLayout isDarkThemeEnabled={isDarkThemeEnabled} />,
+        loader: loadDashboard,
+        children: [
+          {
+            index: true,
+            element: <AddJob />,
+            action: JobdataAction,
+          },
+          {
+            path: "stats",
+            element: <Stats />,
+            loader: statsLoader,
+          },
+          {
+            path: "all-jobs",
+            element: <AllJobs />,
+            loader: allJobsLoader,
+          },
+          {
+            path: "profile",
+            element: <Profile />,
+            action: profileAction,
+          },
 
+          {
+            path: "edit-job/:id",
+            loader: editJobLoader,
+            action: editJobAction,
+            element: <EditJob />,
           },
           {
-            path : 'stats',
-            element : <Stats />,
-            loader : statsLoader
+            path: "delete-job/:id",
+            action: deleteJobAction,
           },
-          {
-            path : 'all-jobs',
-            element : <AllJobs />,
-            loader : allJobsLoader
-          },
-          {
-            path : 'profile',
-            element : <Profile />,
-            action : profileAction
-          },
-          {
-            path : 'admin',
-            element : <Admin />,
-            loader : adminLoader
-          },
-          {
-            path : 'edit-job/:id',
-            loader : editJobLoader,
-            action : editJobAction,
-            element : <EditJob />
-          },
-          {
-            path : 'delete-job/:id',
-            action : deleteJobAction,
-            
-            
-          }
-        ]
-      }
-    ]
-  }
-
-])
-
-
+        ],
+      },
+    ],
+  },
+]);
 
 const App = () => {
-  return (
-    <RouterProvider router={router} />
-  )
-}
+  const [permissionsLoaded, setPermissionsLoaded] = useState(false);
+  useEffect(() => {
+    // Load permissions on app start
+    const loadPermissions = async () => {
+      await PermissionSystem.loadPermissions();
+      setPermissionsLoaded(true); // Indicate permissions are loaded
+    };
 
-export default App
+    loadPermissions();
+  }, []);
+
+  console.log("permission data", permissionsLoaded);
+
+  if (!permissionsLoaded) {
+    return <div>Loading permissions...</div>; // Render loading state
+  }
+
+  return <RouterProvider router={router} />;
+};
+
+export default App;
