@@ -12,6 +12,7 @@ import {
   Tooltip,
   Modal,
   Dialog,
+  Collapse,
   DialogActions,
   DialogContent,
   DialogTitle,
@@ -20,12 +21,11 @@ import {
   Divider,
   Box,
   Typography,
-  Alert,
-  FormControl,
+
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
-import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import { KeyboardArrowDown, KeyboardArrowUp, Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
 import CreateItemModal from "./CreateItemModal"; // Reusing CreateItemModal
@@ -42,30 +42,32 @@ const RolesPermission = () => {
   const [createOpenModal, setCreateOpenModal] = useState(false);
   const [isDeleteConfirm, setIsDeleteConfirm] = useState(false);
   const [deleteRoleId, setDeleteRoleId] = useState(null);
+  const [customPermission, setCustomPermission] = useState(""); // For input field
+  const [openRows, setOpenRows] = useState({});
 
   const { user } = useAdminContext(); // Access the user from context
 
   const canCreateRoles = PermissionSystem.hasPermission(
-    user,
+    user.user,
     "roles",
     "create"
   );
   const canUpdateRoles = PermissionSystem.hasPermission(
-    user,
+    user.user,
     "roles",
     "update"
   );
   const canDeleteRoles = PermissionSystem.hasPermission(
-    user,
+    user.user,
     "roles",
     "delete"
   );
+
 
   useEffect(() => {
     const fetchRoles = async () => {
       try {
         const response = await customFetch.get("/roles");
-        console.log("roles info", response.data);
 
         setRoles(response.data);
       } catch (error) {
@@ -85,23 +87,17 @@ const RolesPermission = () => {
   };
 
   const handleEditRole = (role) => {
-    console.log("role table info", role);
-
     setSelectedRole(role);
     setOpenModal(true);
   };
 
   const handleSaveRole = async () => {
-    console.log(selectedRole);
-
     try {
       // Send the PATCH request to update the role
       const response = await customFetch.patch(
         `/roles/${selectedRole._id}`,
         selectedRole
       );
-
-      console.log(response.data);
 
       // Show success toast if the request is successful
       toast.success("Updated Role Successfully");
@@ -151,11 +147,7 @@ const RolesPermission = () => {
 
   const handleCreateRole = async (formData) => {
     try {
-      console.log("Form data in role:", formData);
-
       const response = await customFetch.post("/roles", formData);
-
-      console.log("Successfully created role:", response.data);
 
       toast.success(response.data.message);
 
@@ -187,6 +179,39 @@ const RolesPermission = () => {
     }));
   };
 
+  const handleDeleteCustomAttr = (key) => {
+    setSelectedRole((prevState) => {
+      const updatedCustomAttr = { ...prevState.customAttr }; // Clone the current customAttr object
+      delete updatedCustomAttr[key]; // Remove the specified attribute
+      return {
+        ...prevState,
+        customAttr: updatedCustomAttr, // Update the customAttr with the modified object
+      };
+    });
+  };
+  const handleAddCustomPermission = () => {
+    if (customPermission.trim()) {
+      setSelectedRole((prevState) => {
+        const updatedCustomAttr = { ...prevState.customAttr }; // Clone the object
+        updatedCustomAttr[customPermission.trim()] = false; // Add new permission with default value false
+        return { ...prevState, customAttr: updatedCustomAttr };
+      });
+      setCustomPermission(""); // Reset the input field after adding
+    }
+  };
+
+  const handleCustomPermissionChange = (permission) => {
+    setSelectedRole((prevData) => {
+      const updatedCustomAttr = { ...prevData.customAttr }; // Clone the object
+      updatedCustomAttr[permission] = !updatedCustomAttr[permission]; // Toggle value
+      return { ...prevData, customAttr: updatedCustomAttr };
+    });
+  };
+
+  const toggleRow = (id) => {
+    setOpenRows((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   return (
     <div className="mb-10  ">
       <h2 className="text-2xl font-semibold mb-4 text-gray-800">
@@ -211,8 +236,10 @@ const RolesPermission = () => {
           <TableHead>
             <TableRow>
               <TableCell className="font-semibold">Role Name</TableCell>
-              <TableCell className="font-semibold">Permissions</TableCell>
-              <TableCell className="font-semibold">Actions</TableCell>
+              <TableCell className="font-semibold">Summary</TableCell>
+              <TableCell className="font-semibold" align="center">
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -220,99 +247,138 @@ const RolesPermission = () => {
               roles
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((role) => (
-                  <TableRow
-                    key={role._id}
-                    hover
-                    className="transition duration-300 ease-in-out"
-                  >
-                    {/* Role Name */}
-                    <TableCell>{role.role}</TableCell>
+                  <>
+                    {/* Compact Row */}
+                    <TableRow key={role._id} hover>
+                      <TableCell>
+                        <Box display="flex" alignItems="center">
+                          <IconButton
+                            onClick={() => toggleRow(role._id)}
+                            size="small"
+                          >
+                            {openRows[role._id] ? (
+                              <KeyboardArrowUp />
+                            ) : (
+                              <KeyboardArrowDown />
+                            )}
+                          </IconButton>
+                          <span className="ml-2">{role.role}</span>
+                        </Box>
+                      </TableCell>
 
-                    {/* Permissions */}
-                    <TableCell>
-                      <div>
-                        {/* Loop through the permissions object keys */}
-                        {role.permissions &&
-                          Object.keys(role.permissions).map((section) => (
-                            <div key={section} className="mb-4">
-                              {/* Resource Name */}
-                              <h4 className="font-semibold mb-2 text-lg">
-                                {section}
-                              </h4>
+                      {/* Summary */}
+                      <TableCell>
+                        {role.role === "superadmin"
+                          ? "All Permissions"
+                          : `${
+                              Object.keys(role.permissions || {}).length
+                            } Permissions`}
+                      </TableCell>
 
-                              {/* Display permissions using Box (Flexbox) */}
-                              <Box display="flex" flexWrap="wrap">
-                                {/* Check if the role is "superadmin" */}
-                                {role.role === "superadmin" ? (
-                                  <div>All Permissions</div>
-                                ) : (
-                                  // Otherwise, map through the permissions
-                                  Object.keys(role.permissions[section]).map(
-                                    (perm) => (
-                                      <Box
-                                        key={perm}
-                                        display="flex"
-                                        alignItems="center"
-                                        mr={4}
-                                      >
-                                        <Checkbox
-                                          checked={
-                                            role.permissions[section][perm]
-                                          }
-                                          disabled
-                                          color="primary"
-                                          inputProps={{
-                                            "aria-label": `${perm} permission`,
-                                          }}
-                                        />
-                                        <span>{perm}</span>
-                                      </Box>
-                                    )
-                                  )
-                                )}
-                              </Box>
-                            </div>
-                          ))}
-                      </div>
-                    </TableCell>
+                      {/* Actions */}
+                      <TableCell align="center">
+                        {role.role !== "superadmin" ? (
+                          <>
+                            {canUpdateRoles && (
+                              <Tooltip title="Edit Role">
+                                <IconButton
+                                  color="primary"
+                                  onClick={() => handleEditRole(role)}
+                                >
+                                  <EditIcon />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            {canDeleteRoles && (
+                              <Tooltip title="Delete Role">
+                                <IconButton
+                                  color="error"
+                                  onClick={() => {
+                                    // Add your delete logic here
+                                  }}
+                                >
+                                  <DeleteIcon />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                          </>
+                        ) : (
+                          <span>Protected</span>
+                        )}
+                      </TableCell>
+                    </TableRow>
 
-                    {/* Actions */}
-                    <TableCell>
-                      {/* Check if role is superadmin */}
-                      {role.role === "superadmin" ? (
-                        <span>Settings are protected</span>
-                      ) : (
-                        <>
-                          {/* Conditionally show Edit button based on canUpdateUsers */}
-                          {canUpdateRoles && (
-                            <Tooltip title="Edit Role">
-                              <IconButton
-                                color="primary"
-                                onClick={() => handleEditRole(role)}
-                              >
-                                <EditIcon />
-                              </IconButton>
-                            </Tooltip>
-                          )}
+                    {/* Collapsible Row */}
+                    <TableRow>
+                      <TableCell
+                        style={{ paddingBottom: 0, paddingTop: 0 }}
+                        colSpan={3}
+                      >
+                        <Collapse
+                          in={openRows[role._id]}
+                          timeout="auto"
+                          unmountOnExit
+                        >
+                          <Box margin={2}>
+                            {/* Permissions Section */}
+                            <h4 className="font-semibold mb-2">Permissions</h4>
+                            {Object.keys(role.permissions || {}).map(
+                              (section) => (
+                                <div key={section} className="mb-2">
+                                  <h5 className="font-medium">{section}</h5>
+                                  <Box display="flex" flexWrap="wrap">
+                                    {Object.keys(role.permissions[section]).map(
+                                      (perm) => (
+                                        <Box
+                                          key={perm}
+                                          display="flex"
+                                          alignItems="center"
+                                          mr={2}
+                                        >
+                                          <Checkbox
+                                            checked={
+                                              role.permissions[section][perm]
+                                            }
+                                            disabled
+                                          />
+                                          <span>{perm}</span>
+                                        </Box>
+                                      )
+                                    )}
+                                  </Box>
+                                </div>
+                              )
+                            )}
 
-                          {/* Always show Delete button for non-superadmin roles */}
-                          {canDeleteRoles && (
-                          <Tooltip title="Delete Role">
-                            <IconButton
-                              color="error"
-                              onClick={() => {
-                                setIsDeleteConfirm(true);
-                                setDeleteRoleId(role._id);
-                              }}
-                            >
-                              <DeleteIcon />
-                            </IconButton>
-                          </Tooltip>
-                          )}
-                        </>
-                      )}
-                    </TableCell>
-                  </TableRow>
+                            {/* Custom Attributes */}
+                            {role.customAttr &&
+                              Object.keys(role.customAttr).length > 0 && (
+                                <>
+                                  <h4 className="font-semibold mt-4 mb-2">
+                                    Custom Attributes
+                                  </h4>
+                                  <Box display="flex" flexWrap="wrap">
+                                    {Object.entries(role.customAttr).map(
+                                      ([key, value]) => (
+                                        <Box
+                                          key={key}
+                                          display="flex"
+                                          alignItems="center"
+                                          mr={2}
+                                        >
+                                          <Checkbox checked={value} disabled />
+                                          <span>{key}</span>
+                                        </Box>
+                                      )
+                                    )}
+                                  </Box>
+                                </>
+                              )}
+                          </Box>
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  </>
                 ))
             ) : (
               <TableRow>
@@ -324,7 +390,7 @@ const RolesPermission = () => {
           </TableBody>
         </Table>
 
-        {/* Pagination Controls */}
+        {/* Pagination */}
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
@@ -345,13 +411,24 @@ const RolesPermission = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             bgcolor: "background.paper",
-            borderRadius: "8px",
+            borderRadius: "12px",
             boxShadow: 24,
             p: 4,
-            width: "400px",
+            width: { xs: "90%", sm: "600px" }, // Responsive width
+            maxHeight: "90vh", // Scrollable for small screens
+            overflowY: "auto",
           }}
         >
-          <Typography variant="h6" sx={{ color: "black" }} gutterBottom>
+          {/* Modal Header */}
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: "bold",
+              textAlign: "center",
+              color: "primary.main",
+              mb: 3,
+            }}
+          >
             Edit Role
           </Typography>
 
@@ -367,66 +444,148 @@ const RolesPermission = () => {
             }
           />
 
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 3 }} />
 
-          <Typography variant="subtitle1" sx={{ color: "black" }}>
+          {/* Permissions Section */}
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: "bold", mb: 2, color: "text.primary" }}
+          >
             Permissions
           </Typography>
 
-          {/* Permissions List - Iterating over resources */}
+          {/* Permission List */}
           {Object.keys(selectedRole?.permissions || {}).map((resource) => (
-            <Box key={resource} sx={{ mb: 2 }}>
+            <Box key={resource} sx={{ mb: 3 }}>
               <Typography
-                variant="body1"
-                sx={{ fontWeight: "bold", mb: 1, color: "black" }}
+                variant="subtitle1"
+                sx={{
+                  fontWeight: "bold",
+                  color: "text.primary",
+                  mb: 1,
+                }}
               >
                 {resource.charAt(0).toUpperCase() + resource.slice(1)}
               </Typography>
-
-              {/* Permissions in a Row using Box with flex */}
-              <Box sx={{ display: "flex", gap: 2 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  color: "text.primary",
+                  flexWrap: "wrap",
+                  gap: 2,
+                }}
+              >
                 {Object.keys(selectedRole.permissions[resource]).map(
                   (permission) => (
-                    <FormControl
+                    <FormControlLabel
                       key={permission}
-                      fullWidth
-                      sx={{ mb: 1, color: "black" }}
-                    >
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={
-                              selectedRole.permissions[resource][permission]
-                            }
-                            onChange={(e) =>
-                              handlePermissionChange(
-                                resource,
-                                permission,
-                                e.target.checked
-                              )
-                            }
-                          />
-                        }
-                        label={
-                          permission.charAt(0).toUpperCase() +
-                          permission.slice(1)
-                        }
-                      />
-                    </FormControl>
+                      control={
+                        <Checkbox
+                          checked={
+                            selectedRole.permissions[resource][permission]
+                          }
+                          onChange={(e) =>
+                            handlePermissionChange(
+                              resource,
+                              permission,
+                              e.target.checked
+                            )
+                          }
+                        />
+                      }
+                      label={
+                        permission.charAt(0).toUpperCase() + permission.slice(1)
+                      }
+                    />
                   )
                 )}
               </Box>
             </Box>
           ))}
-          <Divider sx={{ my: 2 }} />
 
-          {/* Save Changes Button */}
+          {/* Add Custom Permissions */}
+          <Divider sx={{ my: 3 }} />
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{ fontWeight: "bold", mb: 2, color: "text.primary" }}
+            >
+              Add Custom Permission
+            </Typography>
+            <TextField
+              label="Custom Permission"
+              variant="outlined"
+              fullWidth
+              value={customPermission}
+              onChange={(e) => setCustomPermission(e.target.value)}
+              sx={{ marginBottom: 2 }}
+            />
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={handleAddCustomPermission}
+              sx={{ mb: 2 }}
+            >
+              Add Permission
+            </Button>
+            <Box>
+              {selectedRole?.customAttr &&
+                Object.keys(selectedRole.customAttr).map(
+                  (permission, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        mb: 1,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          color: "black",
+                          alignItems: "center",
+                          gap: 1,
+                        }}
+                      >
+                        <Checkbox
+                          checked={!!selectedRole.customAttr[permission]}
+                          onChange={() =>
+                            handleCustomPermissionChange(permission)
+                          }
+                        />
+                        <Typography
+                          variant="body2"
+                          sx={{ color: "text.primary" }}
+                        >
+                          {permission}
+                        </Typography>
+                      </Box>
+                      <Button
+                        variant="outlined"
+                        color="error"
+                        size="small"
+                        onClick={() => handleDeleteCustomAttr(permission)}
+                      >
+                        Remove
+                      </Button>
+                    </Box>
+                  )
+                )}
+            </Box>
+          </Box>
+
+          <Divider sx={{ my: 3 }} />
+
+          {/* Save Button */}
           <Button
             onClick={handleSaveRole}
             variant="contained"
             color="primary"
             fullWidth
-            sx={{ mt: 2 }}
+            sx={{ py: 1.5, fontWeight: "bold" }}
           >
             Save Changes
           </Button>

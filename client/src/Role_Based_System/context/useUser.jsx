@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
 import customFetch from "../../utils/customFetch";
+import { Loading } from "../../components";
 
 const AuthContext = createContext();
 
@@ -29,7 +30,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   if (loading) {
-    return <div>Loading...</div>; 
+    return <Loading />; 
   }
 
   return (

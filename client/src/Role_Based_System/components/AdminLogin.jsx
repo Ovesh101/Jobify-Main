@@ -4,7 +4,6 @@ import {
   redirect,
   useNavigation,
   useActionData,
-  useNavigate,
 } from "react-router-dom";
 
 import Wrapper from "../../assets/wrappers/RegisterAndLoginPage";
@@ -25,7 +24,7 @@ export const action = async ({ request }) => {
 
   try {
     const response = await customFetch.post("/users/login", data);
-    console.log("login data", response);
+   
 
     if (PermissionSystem.hasPermission(response.data.user, "users", "view")) {
       return redirect("/admin/dashboard/users");
@@ -51,15 +50,15 @@ const AdminLogin = () => {
     <Wrapper>
       <Form method="post" className="form">
         <Logo />
-        <h4>Admin Login</h4>
+        <h4>CMS Login</h4>
         {errors?.msg && <p style={{ color: "red" }}>{errors.msg}</p>}
         <FormRow type="email" name="email" />
         <FormRow type="password" name="password" />
         <button type="submit" className="btn btn-block" disabled={isSubmitting}>
           {isSubmitting ? "Logging" : "Login"}
         </button>
-        <Link to="/login" className="member-btn">
-          back to Login
+        <Link to="/login" className="member-btn flex text-[12px] mt-5 ">
+          back to user Login
         </Link>
       </Form>
     </Wrapper>

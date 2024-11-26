@@ -45,30 +45,22 @@ const UsersData = () => {
   const [createOpenModal, setCreateOpenModal] = useState(false); // State for Create Modal
   const { user, isDarkTheme } = useAdminContext();
 
-  console.log("user data in users Data compo", user);
-
-  console.log("dark theme ", isDarkTheme);
-
   // Permission System
   const canCreateUsers = PermissionSystem.hasPermission(
-    user,
+    user.user,
     "users",
     "create"
   );
   const canUpdateUsers = PermissionSystem.hasPermission(
-    user,
+    user.user,
     "users",
     "update"
   );
   const canDeleteUsers = PermissionSystem.hasPermission(
-    user,
+    user.user,
     "users",
     "delete"
   );
-
-
-  console.log("user permission" , canCreateUsers , canUpdateUsers , canDeleteUsers);
-  
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -146,8 +138,6 @@ const UsersData = () => {
   };
 
   const handleCreateUser = async (formData) => {
-    console.log("formdata", formData);
-
     try {
       const response = await customFetch.post("/info/users", formData);
       setUsers((prevUsers) => [...prevUsers, response.data.user]);
@@ -181,24 +171,48 @@ const UsersData = () => {
         </Button>
       )}
 
-      <TableContainer component={Paper} className="shadow-lg rounded-md">
-        <Table>
-          <TableHead>
+      <TableContainer
+        component={Paper}
+        elevation={3}
+        sx={{
+          borderRadius: 2,
+          overflowX: "auto", // Enable horizontal scrolling
+          overflowY: "hidden", // Prevent vertical scrolling unless needed
+          maxWidth: "100%",
+          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)", // Enhance shadow effect
+        }}
+      >
+        <Table
+          sx={{
+            minWidth: "800px", // Force a minimum width to trigger horizontal scroll when needed
+          }}
+        >
+          <TableHead
+            sx={{
+              backgroundColor: "#f5f5f5",
+              "& th": {
+                fontWeight: "bold",
+                color: "#555",
+              },
+            }}
+          >
             <TableRow>
-              <TableCell className="font-semibold">Name</TableCell>
-              <TableCell className="font-semibold">Email</TableCell>
-              <TableCell className="font-semibold">Last Name</TableCell>
-              <TableCell className="font-semibold">Location</TableCell>
-              <TableCell className="font-semibold">Role</TableCell>
-              <TableCell className="font-semibold">Status</TableCell>
-              <TableCell className="font-semibold">Actions</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Last Name</TableCell>
+              <TableCell>Location</TableCell>
+              <TableCell>Role</TableCell>
+              <TableCell>Status</TableCell>
+              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">
-                  No users found
+                <TableCell colSpan={7} align="center">
+                  <Typography variant="body2" color="text.secondary">
+                    No users found
+                  </Typography>
                 </TableCell>
               </TableRow>
             ) : (
@@ -206,9 +220,14 @@ const UsersData = () => {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((SingleUser) => (
                   <TableRow
-                    key={user.id}
+                    key={SingleUser.id}
                     hover
-                    className="transition duration-300 ease-in-out"
+                    sx={{
+                      transition: "background-color 0.3s",
+                      "&:hover": {
+                        backgroundColor: "#f9f9f9",
+                      },
+                    }}
                   >
                     <TableCell>{SingleUser.name}</TableCell>
                     <TableCell>{SingleUser.email}</TableCell>
@@ -216,36 +235,33 @@ const UsersData = () => {
                     <TableCell>{SingleUser.location}</TableCell>
                     <TableCell>{SingleUser.role}</TableCell>
                     <TableCell>
-                      <span
-                        className={`${
-                          user.status === "Active"
-                            ? "text-green-500"
-                            : "text-red-500"
-                        } font-semibold`}
+                      <Typography
+                        sx={{
+                          fontWeight: "bold",
+                          color:
+                            SingleUser.status === "Active" ? "green" : "red",
+                        }}
                       >
                         {SingleUser.status}
-                      </span>
+                      </Typography>
                     </TableCell>
                     <TableCell>
                       {(() => {
-                        // Check if the logged-in user is superadmin
                         const isCurrentUserSuperAdmin =
-                          user.role === "superadmin";
-                        // Check if the displayed user is superadmin
+                          user.user.role === "superadmin";
                         const isTargetUserSuperAdmin =
                           SingleUser.role === "superadmin";
 
-                        // If the logged-in user is superadmin, allow editing/deleting their own data
                         if (
                           isCurrentUserSuperAdmin &&
-                          user._id === SingleUser._id
+                          user.user._id === SingleUser._id
                         ) {
                           return (
                             <>
                               <Tooltip title="Edit User">
                                 <IconButton
                                   color="primary"
-                                  onClick={() => handleEditUser(user)}
+                                  onClick={() => handleEditUser(SingleUser)}
                                 >
                                   <EditIcon />
                                 </IconButton>
@@ -265,18 +281,20 @@ const UsersData = () => {
                           );
                         }
 
-                        // If the logged-in user is not superadmin, hide options for superadmin data
                         if (
                           !isCurrentUserSuperAdmin &&
                           isTargetUserSuperAdmin
                         ) {
-                          return <span>Settings Protected</span>;
+                          return (
+                            <Typography variant="body2" color="text.secondary">
+                              Settings Protected
+                            </Typography>
+                          );
                         }
 
-                        // For all other cases, follow normal permissions
                         return (
                           <>
-                            {canUpdateUsers ? (
+                            {canUpdateUsers && (
                               <Tooltip title="Edit User">
                                 <IconButton
                                   color="primary"
@@ -285,9 +303,8 @@ const UsersData = () => {
                                   <EditIcon />
                                 </IconButton>
                               </Tooltip>
-                            ) : ""}
-
-                            {canDeleteUsers ? (
+                            )}
+                            {canDeleteUsers && (
                               <Tooltip title="Delete User">
                                 <IconButton
                                   color="error"
@@ -299,7 +316,7 @@ const UsersData = () => {
                                   <DeleteIcon />
                                 </IconButton>
                               </Tooltip>
-                            ) : ""}
+                            )}
                           </>
                         );
                       })()}
@@ -309,7 +326,6 @@ const UsersData = () => {
             )}
           </TableBody>
         </Table>
-
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
@@ -318,7 +334,12 @@ const UsersData = () => {
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          className="mt-4"
+          sx={{
+            backgroundColor: "#f5f5f5",
+            "& .MuiTablePagination-toolbar": {
+              justifyContent: "center",
+            },
+          }}
         />
       </TableContainer>
 
@@ -336,102 +357,128 @@ const UsersData = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             bgcolor: "background.paper",
-            borderRadius: "8px",
+            borderRadius: "12px",
             boxShadow: 24,
             p: 4,
-            width: "400px",
+            width: { xs: "90%", sm: "500px" }, // Responsive width
+            maxHeight: "90vh", // Ensures the modal is scrollable on small screens
+            overflowY: "auto",
           }}
         >
-          <Typography variant="h6" sx={{ color: "black" }} gutterBottom>
+          {/* Modal Header */}
+          <Typography
+            id="edit-user-modal"
+            variant="h5"
+            sx={{
+              color: "primary.main",
+              fontWeight: "bold",
+              textAlign: "center",
+              mb: 3,
+            }}
+          >
             Edit User
           </Typography>
 
-          <TextField
-            label="Name"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={selectedUser?.name || ""}
-            onChange={(e) =>
-              setSelectedUser((prev) => ({ ...prev, name: e.target.value }))
-            }
-          />
-          <TextField
-            label="Email"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={selectedUser?.email || ""}
-            onChange={(e) =>
-              setSelectedUser((prev) => ({ ...prev, email: e.target.value }))
-            }
-          />
-          <TextField
-            label="Last Name"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={selectedUser?.lastName || ""}
-            onChange={(e) =>
-              setSelectedUser((prev) => ({ ...prev, lastName: e.target.value }))
-            }
-          />
-          <TextField
-            label="Location"
-            variant="outlined"
-            fullWidth
-            margin="normal"
-            value={selectedUser?.location || ""}
-            onChange={(e) =>
-              setSelectedUser((prev) => ({ ...prev, location: e.target.value }))
-            }
-          />
-
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Role</InputLabel>
-            <Select
-              value={selectedUser?.role || ""}
-              onChange={handleRoleChange}
-              label="Role"
-            >
-              {roleData.map((role) => {
-                // Check if the current role is superadmin and restrict its visibility
-                if (role.role === "superadmin" && user.role !== "superadmin") {
-                  return null; // Don't show the superadmin option for non-superadmins
+          {/* User Details Form */}
+          <form>
+            <TextField
+              label="First Name"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={selectedUser?.name || ""}
+              onChange={(e) =>
+                setSelectedUser((prev) => ({ ...prev, name: e.target.value }))
+              }
+            />
+            <TextField
+              label="Last Name"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={selectedUser?.lastName || ""}
+              onChange={(e) =>
+                setSelectedUser((prev) => ({
+                  ...prev,
+                  lastName: e.target.value,
+                }))
+              }
+            />
+            <TextField
+              label="Email"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={selectedUser?.email || ""}
+              onChange={(e) =>
+                setSelectedUser((prev) => ({ ...prev, email: e.target.value }))
+              }
+            />
+            <TextField
+              label="Location"
+              variant="outlined"
+              fullWidth
+              margin="normal"
+              value={selectedUser?.location || ""}
+              onChange={(e) =>
+                setSelectedUser((prev) => ({
+                  ...prev,
+                  location: e.target.value,
+                }))
+              }
+            />
+            {/* Role Selection */}
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Role</InputLabel>
+              <Select
+                value={selectedUser?.role || ""}
+                onChange={handleRoleChange}
+                label="Role"
+              >
+                {roleData.map((role) => {
+                  if (
+                    role.role === "superadmin" &&
+                    user.user.role !== "superadmin"
+                  ) {
+                    return null;
+                  }
+                  return (
+                    <MenuItem key={role._id} value={role.role}>
+                      {role.role}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </FormControl>
+            {/* Status Selection */}
+            <FormControl fullWidth margin="normal">
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={selectedUser?.status || ""}
+                onChange={(e) =>
+                  setSelectedUser({ ...selectedUser, status: e.target.value })
                 }
-                return (
-                  <MenuItem key={role._id} value={role.role}>
-                    {role.role}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Status</InputLabel>
-            <Select
-              value={selectedUser?.status || ""}
-              onChange={(e) => {
-                const updatedUser = { ...selectedUser, status: e.target.value };
-                setSelectedUser(updatedUser); // Update the selected user with the new status
+                label="Status"
+              >
+                <MenuItem value="Active">Active</MenuItem>
+                <MenuItem value="Inactive">Inactive</MenuItem>
+              </Select>
+            </FormControl>
+            ;{/* Save Button */}
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              sx={{
+                mt: 3,
+                py: 1.5, // Increase padding for a modern button feel
+                fontWeight: "bold",
               }}
-              label="Status"
+              onClick={handleSaveUser}
             >
-              <MenuItem value="Active">Active</MenuItem>
-              <MenuItem value="Inactive">Inactive</MenuItem>
-            </Select>
-          </FormControl>
-
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            sx={{ mt: 2 }}
-            onClick={handleSaveUser}
-          >
-            Save
-          </Button>
+              Save
+            </Button>
+          </form>
         </Box>
       </Modal>
 
@@ -448,7 +495,7 @@ const UsersData = () => {
             color="textSecondary"
             id="delete-dialog-description"
           >
-            Are you sure you want to delete this role? This action cannot be
+            Are you sure you want to delete this user? This action cannot be
             undone.
           </Typography>
         </DialogContent>

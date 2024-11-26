@@ -3,6 +3,7 @@ import Wrapper from '../assets/wrappers/RegisterAndLoginPage'
 import { toast } from 'react-toastify';
 import { Logo , FormRow } from '../components'
 import customFetch from '../utils/customFetch';
+import { useUser } from '../Role_Based_System/context/useUser';
 
 export const action = async ({request})=>{
   const formData = await request.formData();
@@ -37,12 +38,13 @@ export const action = async ({request})=>{
 const Login = () => {
   const errors = useActionData();
   const navigation = useNavigation();
+  
   const isSubmitting = navigation.state === 'submitting'
   return (
     <Wrapper>
       <Form method="post" className='form'>
         <Logo />
-        <h4>Login</h4>
+        <h4>User Login</h4>
         {errors?.msg &&  <p style={{color : 'red'}}>{errors.msg}</p>}
         <FormRow type='email' name='email' />
         <FormRow type='password' name='password' />
@@ -52,7 +54,7 @@ const Login = () => {
           Not a member yet?
           <Link to='/register' className='member-btn'>Register</Link>
           <div className='text-[12px]' >
-          <Link to='/admin/login' className='member-btn'>Admin Login</Link>
+          <Link to='/admin/login' className='member-btn'>CMS Login</Link>
           </div>
 
          

@@ -7,8 +7,8 @@ import { MdQueryStats } from "react-icons/md"; // MdSettings for roles
 import PermissionSystem from "../auth"
 
 const NavLinks = ({ isBigSidebar }) => {
-  const { toggleSidebar } = useAdminContext(); // Use AdminContext
-  const user = useAdminContext();
+  const {  user ,toggleSidebar } = useAdminContext(); // Use AdminContext
+  
 
   // Define Admin-specific links
   const adminLinks = [

@@ -13,7 +13,10 @@ import LogoutContainer from './LogoutContainer';
 
 const Navbar = () => {
   // Use AdminContext to get context values like sidebar toggle function and user info
-  const { toggleSidebar } = useAdminContext(); // Changed to useAdminContext
+  const { user , toggleSidebar } = useAdminContext(); // Changed to useAdminContext
+
+
+  
 
 
   
@@ -27,7 +30,7 @@ const Navbar = () => {
 
         <div>
           <Logo />
-          <h4 className="logo-text">Admin Dashboard</h4> {/* Changed text to Admin Dashboard */}
+          <h4 className="logo-text">{user.user.role} Dashboard</h4> {/* Changed text to Admin Dashboard */}
         </div>
 
         <div className="btn-container">

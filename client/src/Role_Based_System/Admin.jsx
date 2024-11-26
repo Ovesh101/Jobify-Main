@@ -1,41 +1,33 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { Outlet, redirect, useLoaderData, useNavigate, useNavigation } from 'react-router-dom';
+import { createContext, useContext, useState, useEffect } from "react";
+import {
+  Outlet,
+
+  useNavigate,
+  useNavigation,
+} from "react-router-dom";
 import customFetch from "../utils/customFetch";
 
-import BigSidebar from './components/BigSidebar';
+import BigSidebar from "./components/BigSidebar";
 import Wrapper from "../assets/wrappers/Dashboard";
-import { toast } from 'react-toastify';
-import  SmallSidebar  from './components/SmallSidebar';
-import Navbar from './components/Navbar';
-// Loader function to fetch current admin user
-export const loader = async () => {
-  try {
-    const { data } = await customFetch.get("/info/current-user");
+import { toast } from "react-toastify";
+import SmallSidebar from "./components/SmallSidebar";
+import Navbar from "./components/Navbar";
+import { useUser } from "./context/useUser";
+import { Loading } from "../components";
 
-    return data;
-  } catch (error) {
-    toast.error("Failed to fetch user data.");
-    return redirect("/"); // Redirect to home or login page if error occurs
-  }
-};
-
-// remove loader fucntion 
-
+// remove loader fucntion
 
 const AdminContext = createContext();
 
 const AdminLayout = ({ isDarkThemeEnabled }) => {
-  const {user} = useLoaderData(); // Get user data from loader
-
+  const { user } = useUser();
 
   const navigate = useNavigate();
   const navigation = useNavigation();
   const isPageLoading = navigation.state === "loading";
 
-
   const [showSidebar, setShowSidebar] = useState(false);
   const [isDarkTheme, setIsDarkTheme] = useState(isDarkThemeEnabled);
-
 
   useEffect(() => {
     const storedTheme = localStorage.getItem("darkTheme");
@@ -83,7 +75,7 @@ const AdminLayout = ({ isDarkThemeEnabled }) => {
       <Wrapper>
         <main className="dashboard">
           <SmallSidebar />
-         <BigSidebar />
+          <BigSidebar />
           <div>
             <Navbar />
             <div className="dashboard-page">

@@ -9,7 +9,7 @@ const ProtectedRoute = ({ children, resource, action,  fallback = "/not-authoriz
   
   const hasPermission = PermissionSystem.hasPermission(user.user, resource, action);
  
-console.log("has permission" , hasPermission , user.role , resource , action);
+
 
   
 

@@ -8,7 +8,6 @@ const LogoutContainer = () => {
   const [showLogout, setShowLogout] = useState(false);
   const { user, logoutUser } = useAdminContext(); // Use AdminContext
 
-  console.log("user in log out", user);
 
   return (
     <Wrapper>
@@ -17,14 +16,15 @@ const LogoutContainer = () => {
         className="btn logout-btn"
         onClick={() => setShowLogout(!showLogout)}
       >
-        {user.avatar ? (
-          <img src={user?.avatar} alt="avatar" className="img" />
+        {user.user.avatar ? (
+          <img src={user?.user?.avatar} alt="avatar" className="img" />
         ) : (
           <FaUserCircle />
         )}
-        {user?.name}
+        {user?.user.name}
         <FaCaretDown />
       </button>
+
       <div className={showLogout ? "dropdown show-dropdown" : "dropdown"}>
         <button type="button" className="dropdown-btn" onClick={logoutUser}>
           Logout

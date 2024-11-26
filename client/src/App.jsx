@@ -1,16 +1,18 @@
+import { lazy, Suspense } from "react";
 import {
   Error,
   Register,
   Login,
   Landing,
-  DashboardLayout,
   Stats,
   AllJobs,
   Profile,
-  Admin,
   AddJob,
   EditJob,
 } from "./pages";
+
+const DashboardLayout = lazy(() => import("./pages/DashboardLayout"));
+
 import AdminLogin from "./Role_Based_System/components/AdminLogin.jsx";
 
 import HomeLayout from "./pages/HomeLayout.jsx";
@@ -18,9 +20,9 @@ import PermissionSystem from "./Role_Based_System/auth.js";
 import ProtectedRoute from "./Role_Based_System/components/ProtectedRoute.jsx";
 
 import {
-  Navigate,
   RouterProvider,
   createBrowserRouter,
+  Navigate,
 } from "react-router-dom";
 
 import { action as registerAction } from "./pages/Register";
@@ -30,17 +32,20 @@ import { action as JobdataAction } from "./pages/AddJob";
 import { loader as loadDashboard } from "./pages/DashboardLayout";
 import { loader as allJobsLoader } from "./pages/AllJobs";
 import { loader as editJobLoader } from "./pages/EditJob";
-import AdminLayout, {
-  loader as adminLoader,
-} from "./Role_Based_System/Admin.jsx";
+import AdminLayout from "./Role_Based_System/Admin.jsx";
 import { action as editJobAction } from "./pages/EditJob";
 import { action as deleteJobAction } from "./pages/DeleteJob";
 import { action as profileAction } from "./pages/Profile";
 import { loader as statsLoader } from "./pages/Stats";
 import { useEffect, useState } from "react";
-import UsersData from "./Role_Based_System/components/UsersData.jsx";
-import RolesPermission from "./Role_Based_System/components/RolesPermission.jsx";
+const UsersData = lazy(() =>
+  import("./Role_Based_System/components/UsersData.jsx")
+);
+const RolesPermission = lazy(() =>
+  import("./Role_Based_System/components/RolesPermission.jsx")
+);
 import { AuthProvider } from "./Role_Based_System/context/useUser.jsx";
+import Loading from "./components/Loading.jsx";
 
 const checkDefaultTheme = () => {
   const isDarkTheme = localStorage.getItem("darkTheme") === "true";
@@ -75,6 +80,7 @@ const router = createBrowserRouter([
         element: <AdminLogin />,
         action: adminLoginAction,
       },
+
       {
         path: "/admin/dashboard",
         element: (
@@ -82,13 +88,20 @@ const router = createBrowserRouter([
             <AdminLayout isDarkThemeEnabled={isDarkThemeEnabled} />
           </AuthProvider>
         ),
-        loader: adminLoader, // Ensure this loader verifies the user's admin role
+
         children: [
           {
+            index: true,
+            element: <Navigate to="/admin/dashboard/users" replace />,
+          },
+          {
+            index: true,
             path: "users", // Accessible at /admin/dashboard/users
             element: (
               <ProtectedRoute resource="users" action="view">
-                <UsersData />
+                <Suspense fallback={<Loading />}>
+                  <UsersData />
+                </Suspense>
               </ProtectedRoute>
             ),
           },
@@ -96,7 +109,9 @@ const router = createBrowserRouter([
             path: "roles", // Accessible at /admin/dashboard/roles
             element: (
               <ProtectedRoute resource="roles" action="view">
-                <RolesPermission />
+                <Suspense fallback={<Loading />}>
+                  <RolesPermission />
+                </Suspense>
               </ProtectedRoute>
             ),
           },
@@ -104,7 +119,11 @@ const router = createBrowserRouter([
       },
       {
         path: "/dashboard",
-        element: <DashboardLayout isDarkThemeEnabled={isDarkThemeEnabled} />,
+        element: (
+          <Suspense fallback={<Loading />}>
+            <DashboardLayout isDarkThemeEnabled={isDarkThemeEnabled} />
+          </Suspense>
+        ),
         loader: loadDashboard,
         children: [
           {
@@ -146,6 +165,7 @@ const router = createBrowserRouter([
 
 const App = () => {
   const [permissionsLoaded, setPermissionsLoaded] = useState(false);
+
   useEffect(() => {
     // Load permissions on app start
     const loadPermissions = async () => {
