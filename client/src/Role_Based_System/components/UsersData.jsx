@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Table,
   TableBody,
@@ -33,6 +33,7 @@ import { toast } from "react-toastify";
 import CreateItemModal from "./CreateItemModal"; // Import CreateItemModal component
 import { useAdminContext } from "../Admin";
 import PermissionSystem from "../auth";
+import UserTableControls from "./UserTableControls";
 
 const UsersData = () => {
   const [page, setPage] = useState(0);
@@ -45,6 +46,54 @@ const UsersData = () => {
   const [roleData, setRoleData] = useState([]); // Array of roles
   const [createOpenModal, setCreateOpenModal] = useState(false); // State for Create Modal
   const { user, isDarkTheme } = useAdminContext();
+  // Search logic state variable
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
+  const [filterRole, setFilterRole] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
+  const [sortBy] = useState("createdAt");
+
+  const filteredUsers = useMemo(() => {
+    return users
+      .filter((user) => {
+        return (
+          // Search is still applied based on name or email (if required)
+          (user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(searchTerm.toLowerCase())) &&
+          (filterStatus ? user.status === filterStatus : true) &&
+          (filterRole ? user.role === filterRole : true)
+        );
+      })
+      .sort((a, b) => {
+        // Sorting based on `createdAt` field (ascending or descending)
+        const dateA = new Date(a.createdAt);
+        const dateB = new Date(b.createdAt);
+  
+        if (sortOrder === "asc") {
+          return dateA - dateB; // Ascending order
+        } else {
+          return dateB - dateA; // Descending order
+        }
+      });
+  }, [users, searchTerm, filterStatus, filterRole, sortOrder]);
+  
+  // Handler functions for the controls
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+  
+  const handleFilterStatusChange = (event) => {
+    setFilterStatus(event.target.value);
+  };
+  
+  const handleFilterRoleChange = (event) => {
+    setFilterRole(event.target.value);
+  };
+  
+  const handleSortChange = (order = sortOrder) => {
+    setSortOrder(order);
+  };
+  
 
   // Permission System
   const canCreateUsers = PermissionSystem.hasPermission(
@@ -108,7 +157,7 @@ const UsersData = () => {
   const handleSaveUser = async () => {
     try {
       if (!selectedUser?.name?.trim()) {
-        toast.error("Name is Required")
+        toast.error("Name is Required");
         return; // Stop saving if the field is empty
       }
       if (!selectedUser?.lastName?.trim()) {
@@ -116,7 +165,7 @@ const UsersData = () => {
         return; // Stop saving if the field is empty
       }
       if (
-        !selectedUser?.email?.trim() || 
+        !selectedUser?.email?.trim() ||
         !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(selectedUser.email)
       ) {
         toast.error("valid Email is required");
@@ -192,6 +241,18 @@ const UsersData = () => {
           Create User
         </Button>
       )}
+      <UserTableControls
+      roleData={roleData}
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        filterStatus={filterStatus}
+        onFilterStatusChange={handleFilterStatusChange}
+        filterRole={filterRole}
+        onFilterRoleChange={handleFilterRoleChange}
+        sortBy={sortBy}
+        onSortChange={handleSortChange}
+        sortOrder={sortOrder}
+      />
 
       <TableContainer
         component={Paper}
@@ -204,23 +265,24 @@ const UsersData = () => {
           boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)", // Enhance shadow effect
         }}
       >
-        <Table
-          sx={{
-            minWidth: "800px", // Force a minimum width to trigger horizontal scroll when needed
-          }}
-        >
+        <Table>
           <TableHead
             sx={{
               backgroundColor: "#f5f5f5",
               "& th": {
                 fontWeight: "bold",
                 color: "#555",
+                cursor: "pointer",
               },
             }}
           >
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Email</TableCell>
+              <TableCell onClick={() => handleSortChange("name")}>
+                Name
+              </TableCell>
+              <TableCell onClick={() => handleSortChange("email")}>
+                Email
+              </TableCell>
               <TableCell>Last Name</TableCell>
               <TableCell>Location</TableCell>
               <TableCell>Role</TableCell>
@@ -229,7 +291,7 @@ const UsersData = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {users.length === 0 ? (
+            {filteredUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} align="center">
                   <Typography variant="body2" color="text.secondary">
@@ -238,7 +300,7 @@ const UsersData = () => {
                 </TableCell>
               </TableRow>
             ) : (
-              users
+              filteredUsers
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((SingleUser) => (
                   <TableRow
@@ -291,32 +353,18 @@ const UsersData = () => {
                               <Tooltip title="Delete User">
                                 <IconButton
                                   color="error"
-                                  onClick={() => {
-                                    setDeleteUserId(user._id);
-                                    setIsDeleteConfirm(true);
-                                  }}
+                                  onClick={() =>
+                                    handleDeleteUser(SingleUser._id)
+                                  }
                                 >
                                   <DeleteIcon />
                                 </IconButton>
                               </Tooltip>
                             </>
                           );
-                        }
-
-                        if (
-                          !isCurrentUserSuperAdmin &&
-                          isTargetUserSuperAdmin
-                        ) {
+                        } else if (!isTargetUserSuperAdmin) {
                           return (
-                            <Typography variant="body2" color="text.secondary">
-                              Settings Protected
-                            </Typography>
-                          );
-                        }
-
-                        return (
-                          <>
-                            {canUpdateUsers && (
+                            <>
                               <Tooltip title="Edit User">
                                 <IconButton
                                   color="primary"
@@ -325,22 +373,19 @@ const UsersData = () => {
                                   <EditIcon />
                                 </IconButton>
                               </Tooltip>
-                            )}
-                            {canDeleteUsers && (
                               <Tooltip title="Delete User">
                                 <IconButton
                                   color="error"
-                                  onClick={() => {
-                                    setDeleteUserId(SingleUser._id);
-                                    setIsDeleteConfirm(true);
-                                  }}
+                                  onClick={() =>
+                                    handleDeleteUser(SingleUser._id)
+                                  }
                                 >
                                   <DeleteIcon />
                                 </IconButton>
                               </Tooltip>
-                            )}
-                          </>
-                        );
+                            </>
+                          );
+                        }
                       })()}
                     </TableCell>
                   </TableRow>
@@ -351,17 +396,11 @@ const UsersData = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={users.length}
+          count={filteredUsers.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}
           onRowsPerPageChange={handleChangeRowsPerPage}
-          sx={{
-            backgroundColor: "#f5f5f5",
-            "& .MuiTablePagination-toolbar": {
-              justifyContent: "center",
-            },
-          }}
         />
       </TableContainer>
 
