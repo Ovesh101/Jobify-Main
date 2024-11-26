@@ -2,25 +2,31 @@ import Role from '../models/RoleModal.js'; // Import the Role model
 
 export const createRole = async (req, res) => {
   try {
-    const { role, permissions } = req.body; // Extract `role` and `permissions` from the request body
+    const { role, permissions, customAttr } = req.body; // Extract `role`, `permissions`, and `customAttr` from the request body
 
     console.log("Role data received:", req.body);
 
     // Check if the role already exists
     const existingRole = await Role.findOne({ role });
     if (existingRole) {
-      return res.status(400).json({ message: 'Role already exists' });
+      return res.status(400).json({ message: "Role already exists" });
     }
 
-    // Validate permissions (optional, depending on your needs)
+    // Validate permissions
     if (permissions && typeof permissions !== "object") {
       return res.status(400).json({ message: "Invalid permissions format" });
+    }
+
+    // Validate customAttr
+    if (customAttr && typeof customAttr !== "object") {
+      return res.status(400).json({ message: "Invalid customAttr format" });
     }
 
     // Create and save the new role
     const newRole = new Role({
       role,
-      permissions: new Map(Object.entries(permissions)), // Convert permissions object to a Map
+      permissions: permissions ? new Map(Object.entries(permissions)) : undefined, // Convert permissions object to a Map if provided
+      customAttr: customAttr || {}, // Default to an empty object if not provided
     });
 
     await newRole.save();
@@ -34,6 +40,7 @@ export const createRole = async (req, res) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+
 
   
   
@@ -87,7 +94,9 @@ export const editRole = async (req, res) => {
       console.log("Editing role...");
   
       // Extract role and permissions from the request body
-      const { role, permissions } = req.body;
+      const { role, permissions , customAttr } = req.body;
+      console.log("editing " , req.body );
+      
   
       // Validate role name (e.g., not empty or whitespace)
       if (role && role.trim().length === 0) {
@@ -116,6 +125,15 @@ export const editRole = async (req, res) => {
         }
   
         updatedRole.permissions = permissions;
+      }
+      if (customAttr) {
+        // Validate the permissions structure if needed
+        // Example: Check if permissions is an object
+        if (typeof customAttr !== 'object' || Array.isArray(customAttr)) {
+          return res.status(400).json({ message: 'Invalid Custom Attr structure' });
+        }
+  
+        updatedRole.customAttr = customAttr;
       }
   
       // Save the updated role to the database

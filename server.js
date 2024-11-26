@@ -47,7 +47,7 @@ app.get("/api/v1/test", (req, res) => {
 app.use("/api/v1/jobs", authenticateUser, jobRouter);
 app.use("/api/v1/info", authenticateUser, userInfoRouter);
 app.use("/api/v1/users",  userRouter);
-app.use("/api/v1/roles",  roleRouter);
+app.use("/api/v1/roles", authenticateUser ,  roleRouter);
 
 app.get("*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "./client/dist", "index.html"));

@@ -5,12 +5,12 @@ const RoleSchema = new mongoose.Schema(
     role: {
       type: String,
       required: true,
-      unique:true,
+      unique: true,
       trim: true, // Removes whitespace around the value
       set: (value) => value.toLowerCase(), // Convert to lowercase before saving
     },
     permissions: {
-      type: Map, // Use a Map to define dynamic resources
+      type: Map, // Use Map to define dynamic resources like users, roles, etc.
       of: new mongoose.Schema(
         {
           view: { type: Boolean, default: false },
@@ -21,6 +21,10 @@ const RoleSchema = new mongoose.Schema(
         },
         { _id: false } // Prevents an _id field for nested permissions
       ),
+      default: {}, // Default to an empty object
+    },
+    customAttr: {
+      type: Object, // Use plain object instead of Map
       default: {}, // Default to an empty object
     },
   },
