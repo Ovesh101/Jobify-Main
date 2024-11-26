@@ -10,11 +10,7 @@ export const loader = async () => {
   try {
     const { data } = await customFetch.get('/info/current-user');
     
-    if (data?.user.role === 'admin') {
-      // Redirect admins attempting to access non-admin routes
-      return redirect('/admin/dashboard/users');
-    }
-    
+    redirect("/dashboard")
     return data;
   } catch (error) {
     return redirect('/dashboard');
@@ -37,6 +33,7 @@ const DashboardLayout = ({ isDarkThemeEnabled }) => {
 
   // Set initial theme from localStorage or fallback to prop
   useEffect(() => {
+    const token = localStorage.getItem("token")
     const storedTheme = localStorage.getItem('darkTheme');
     if (storedTheme) {
       setIsDarkTheme(storedTheme === 'true');
@@ -44,6 +41,10 @@ const DashboardLayout = ({ isDarkThemeEnabled }) => {
     } else {
       // Apply the passed theme if available, otherwise fallback to default
       document.body.classList.toggle('dark-theme', isDarkTheme);
+    }
+
+    if(!token){
+      navigate('/login')
     }
   }, [isDarkTheme, isDarkThemeEnabled]);
 
@@ -64,6 +65,7 @@ const DashboardLayout = ({ isDarkThemeEnabled }) => {
   const logoutUser = async () => {
     try {
       await customFetch.get('/users/logout');
+      localStorage.removeItem("token")
       toast.success('Logged out successfully!');
       navigate('/'); // Redirect to the homepage or login page after logout
     } catch (error) {

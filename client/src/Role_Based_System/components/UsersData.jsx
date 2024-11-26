@@ -107,6 +107,21 @@ const UsersData = () => {
 
   const handleSaveUser = async () => {
     try {
+      if (!selectedUser?.name?.trim()) {
+        toast.error("Name is Required")
+        return; // Stop saving if the field is empty
+      }
+      if (!selectedUser?.lastName?.trim()) {
+        toast.error("Last Name is required");
+        return; // Stop saving if the field is empty
+      }
+      if (
+        !selectedUser?.email?.trim() || 
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(selectedUser.email)
+      ) {
+        toast.error("valid Email is required");
+        return;
+      }
       const response = await customFetch.patch(
         `/info/users/${selectedUser._id}`,
         selectedUser
@@ -119,7 +134,7 @@ const UsersData = () => {
       );
       handleCloseModal();
     } catch (error) {
-      toast.error("Failed to update user");
+      toast.error(error?.response?.data?.msg);
       console.error("Error saving user:", error);
     }
   };
@@ -408,6 +423,10 @@ const UsersData = () => {
               onChange={(e) =>
                 setSelectedUser((prev) => ({ ...prev, name: e.target.value }))
               }
+              error={!selectedUser?.name?.trim()} // Check if the field is empty
+              helperText={
+                !selectedUser?.name?.trim() ? "First Name is required" : "" // Display error message
+              }
             />
             <TextField
               label="Last Name"
@@ -421,6 +440,10 @@ const UsersData = () => {
                   lastName: e.target.value,
                 }))
               }
+              error={!selectedUser?.lastName?.trim()} // Check if the field is empty
+              helperText={
+                !selectedUser?.lastName?.trim() ? "Last Name is required" : "" // Display error message
+              }
             />
             <TextField
               label="Email"
@@ -428,8 +451,19 @@ const UsersData = () => {
               fullWidth
               margin="normal"
               value={selectedUser?.email || ""}
-              onChange={(e) =>
-                setSelectedUser((prev) => ({ ...prev, email: e.target.value }))
+              onChange={(e) => {
+                const input = e.target.value;
+                setSelectedUser((prev) => ({ ...prev, email: input }));
+              }}
+              error={
+                !!selectedUser?.email && // Show error only when there's input
+                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(selectedUser?.email) // Validate email format
+              }
+              helperText={
+                !!selectedUser?.email && // Show helper text only when there's input
+                !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(selectedUser?.email)
+                  ? "Please enter a valid email address"
+                  : ""
               }
             />
             <TextField

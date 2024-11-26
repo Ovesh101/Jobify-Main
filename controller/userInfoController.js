@@ -121,6 +121,9 @@ export const updateUserInfo = async (req, res) => {
     const userId = req.params.id; // User ID to be updated
     const updatedData = req.body; // Data to update the user with
 
+    console.log("updated data" , updatedData);
+    
+
     // Find the user by ID
     const user = await User.findById(userId);
 

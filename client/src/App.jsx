@@ -117,7 +117,6 @@ const router = createBrowserRouter([
               </ProtectedRoute>
             ),
             errorElement: <NotAuthorized />, // Assign the error handler here
-
           },
         ],
       },

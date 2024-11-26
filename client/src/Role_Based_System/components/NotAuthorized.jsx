@@ -5,12 +5,12 @@ import img from "../../assets/images/unauthorized.jpg";
 const NotAuthorized = () => {
   return (
     <Wrapper className="flex items-center justify-center  bg-gradient-to-b from-gray-100 to-gray-300">
-      <div className="bg-white rounded-lg shadow-xl p-8   mx-auto text-center border border-gray-200">
+      <div className="bg-white rounded-lg shadow-xl p-[100px]   mx-auto text-center border border-gray-200">
         <div className="relative overflow-hidden rounded-md mb-6">
           <img
             src={img}
             alt="Not Authorized"
-            className=" w-[300px] h-[300px]  object-contain"
+            className=" md:w-[300px] md:h-[300px]  object-contain"
           />
         </div>
         <h1 className="text-3xl font-bold text-gray-900 mb-4">

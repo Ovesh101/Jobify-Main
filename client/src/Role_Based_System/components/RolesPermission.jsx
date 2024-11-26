@@ -81,14 +81,13 @@ const RolesPermission = () => {
     fetchRoles();
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     const loadPermissions = async () => {
       await PermissionSystem.loadPermissions();
     };
 
     loadPermissions();
-
-  } , [roles])
+  }, [roles]);
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -106,6 +105,10 @@ const RolesPermission = () => {
 
   const handleSaveRole = async () => {
     try {
+      if (!selectedRole?.role?.trim()) {
+        toast.error("Role Name is required");
+        return; // Stop saving if the field is empty
+      }
       // Send the PATCH request to update the role
       const response = await customFetch.patch(
         `/roles/${selectedRole._id}`,
@@ -469,6 +472,12 @@ const RolesPermission = () => {
             value={selectedRole?.role || ""}
             onChange={(e) =>
               setSelectedRole((prev) => ({ ...prev, role: e.target.value }))
+            }
+            error={!selectedRole?.role?.trim()} // Show error if the field is empty
+            helperText={
+              !selectedRole?.role?.trim()
+                ? "Role Name is required" // Error message for empty field
+                : ""
             }
           />
 
