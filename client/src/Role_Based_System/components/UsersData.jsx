@@ -26,6 +26,7 @@ import {
   MenuItem,
   CircularProgress,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
 import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
@@ -158,7 +159,13 @@ const UsersData = () => {
 
   return (
     <div className="mb-10">
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800">Users Data</h2>
+      <h2
+        className={`text-2xl font-semibold mb-4 ${
+          isDarkTheme ? "text-white" : "text-black"
+        }`}
+      >
+        Users Data
+      </h2>
 
       {canCreateUsers && (
         <Button
@@ -365,6 +372,17 @@ const UsersData = () => {
             overflowY: "auto",
           }}
         >
+          <IconButton
+            onClick={() => setOpenModal(false)}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              color: "text.primary",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
           {/* Modal Header */}
           <Typography
             id="edit-user-modal"

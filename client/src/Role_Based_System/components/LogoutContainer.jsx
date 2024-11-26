@@ -6,7 +6,7 @@ import { useAdminContext } from "../Admin";
 
 const LogoutContainer = () => {
   const [showLogout, setShowLogout] = useState(false);
-  const { user, logoutUser } = useAdminContext(); // Use AdminContext
+  const { user, logoutUser  } = useAdminContext(); // Use AdminContext
 
 
   return (

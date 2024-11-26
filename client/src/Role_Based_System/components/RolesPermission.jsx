@@ -21,11 +21,16 @@ import {
   Divider,
   Box,
   Typography,
-
   FormControlLabel,
   Checkbox,
 } from "@mui/material";
-import { KeyboardArrowDown, KeyboardArrowUp, Edit as EditIcon, Delete as DeleteIcon } from "@mui/icons-material";
+import {
+  KeyboardArrowDown,
+  KeyboardArrowUp,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
+import CloseIcon from "@mui/icons-material/Close";
 import customFetch from "../../utils/customFetch";
 import { toast } from "react-toastify";
 import CreateItemModal from "./CreateItemModal"; // Reusing CreateItemModal
@@ -45,7 +50,7 @@ const RolesPermission = () => {
   const [customPermission, setCustomPermission] = useState(""); // For input field
   const [openRows, setOpenRows] = useState({});
 
-  const { user } = useAdminContext(); // Access the user from context
+  const { user, isDarkTheme } = useAdminContext(); // Access the user from context
 
   const canCreateRoles = PermissionSystem.hasPermission(
     user.user,
@@ -62,7 +67,6 @@ const RolesPermission = () => {
     "roles",
     "delete"
   );
-
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -214,7 +218,11 @@ const RolesPermission = () => {
 
   return (
     <div className="mb-10  ">
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+      <h2
+        className={`text-2xl font-semibold mb-4 ${
+          isDarkTheme ? "text-white" : "text-black"
+        }`}
+      >
         Roles & Permissions
       </h2>
 
@@ -419,6 +427,17 @@ const RolesPermission = () => {
             overflowY: "auto",
           }}
         >
+          <IconButton
+            onClick={() => setOpenModal(false)}
+            sx={{
+              position: "absolute",
+              top: 8,
+              right: 8,
+              color: "text.primary",
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
           {/* Modal Header */}
           <Typography
             variant="h5"

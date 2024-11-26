@@ -40,10 +40,10 @@ const login = async (req, res) => {
     secure: process.env.NODE_ENV === "production",
   });
 
-  res.status(StatusCodes.OK).json({ user:user , msg: "Login Successfully " });
+  res.status(StatusCodes.OK).json({ user:user , token:token , msg: "Login Successfully " });
 };
 
-export const logout = async (req, res) => {
+ const logout = async (req, res) => {
   res.cookie("token", "logout", {
     httpOnly: true,
     expires: new Date(Date.now()),
@@ -51,4 +51,4 @@ export const logout = async (req, res) => {
   res.status(StatusCodes.OK).json({  msg: "User Logout Successfully" });
 };
 
-export { register, login };
+export { register, login , logout };

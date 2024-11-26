@@ -4,6 +4,7 @@ import {
   redirect,
   useNavigation,
   useActionData,
+  useNavigate,
 } from "react-router-dom";
 
 import Wrapper from "../../assets/wrappers/RegisterAndLoginPage";
@@ -12,6 +13,9 @@ import { Logo, FormRow } from "../../components";
 
 import customFetch from "../../utils/customFetch";
 import PermissionSystem from "../auth";
+import { useUser } from "../context/useUser";
+import { useEffect } from "react";
+
 
 export const action = async ({ request }) => {
   const formData = await request.formData();
@@ -24,7 +28,11 @@ export const action = async ({ request }) => {
 
   try {
     const response = await customFetch.post("/users/login", data);
-   
+
+    console.log("response in admin login page" , response.data);
+
+    localStorage.setItem("token" , response.data.token)
+    
 
     if (PermissionSystem.hasPermission(response.data.user, "users", "view")) {
       return redirect("/admin/dashboard/users");
@@ -43,7 +51,28 @@ export const action = async ({ request }) => {
 };
 
 const AdminLogin = () => {
+ 
+
   const errors = useActionData();
+  const token  = localStorage.getItem("token")
+  console.log("token in local storage" , token);
+  
+  
+
+  const navigate = useNavigate();
+
+  useEffect(()=>{
+    if(token){
+      navigate('/admin/dashboard')
+    }else{
+      navigate('/admin/login')
+    }
+
+  } , [])
+
+
+  
+
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
   return (

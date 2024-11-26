@@ -1,5 +1,4 @@
 import { createContext, useContext, useState, useEffect } from "react";
-
 import customFetch from "../../utils/customFetch";
 import { Loading } from "../../components";
 
@@ -22,7 +21,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-
+  // Function to handle logout
+  const logout = () => {
+    setUser(null); // Clear user state
+    // Any other logout logic (like clearing cookies) can go here
+  };
 
   // Fetch user data on component mount
   useEffect(() => {
@@ -30,11 +33,11 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   if (loading) {
-    return <Loading />; 
+    return <Loading />;
   }
 
   return (
-    <AuthContext.Provider value={{ user }}>
+    <AuthContext.Provider value={{ user, logout }}>
       {children}
     </AuthContext.Provider>
   );

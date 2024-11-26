@@ -46,6 +46,7 @@ const RolesPermission = lazy(() =>
 );
 import { AuthProvider } from "./Role_Based_System/context/useUser.jsx";
 import Loading from "./components/Loading.jsx";
+import NotAuthorized from "./Role_Based_System/components/NotAuthorized.jsx";
 
 const checkDefaultTheme = () => {
   const isDarkTheme = localStorage.getItem("darkTheme") === "true";
@@ -104,6 +105,7 @@ const router = createBrowserRouter([
                 </Suspense>
               </ProtectedRoute>
             ),
+            errorElement: <NotAuthorized />, // Assign the error handler here
           },
           {
             path: "roles", // Accessible at /admin/dashboard/roles
@@ -114,6 +116,8 @@ const router = createBrowserRouter([
                 </Suspense>
               </ProtectedRoute>
             ),
+            errorElement: <NotAuthorized />, // Assign the error handler here
+
           },
         ],
       },
@@ -158,6 +162,11 @@ const router = createBrowserRouter([
             action: deleteJobAction,
           },
         ],
+      },
+      {
+        path: "/not-authorized",
+
+        element: <NotAuthorized />,
       },
     ],
   },

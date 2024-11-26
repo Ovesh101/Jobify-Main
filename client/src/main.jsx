@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
+import { AuthProvider } from "./Role_Based_System/context/useUser.jsx";
 
 import "./index.css";
 // import axios from 'axios'
@@ -14,9 +15,9 @@ import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-  
+    <AuthProvider>
       <App />
       <ToastContainer position="top-center" />
-
+    </AuthProvider>
   </React.StrictMode>
 );

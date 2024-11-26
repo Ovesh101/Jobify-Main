@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { Logo , FormRow } from '../components'
 import customFetch from '../utils/customFetch';
 import { useUser } from '../Role_Based_System/context/useUser';
+import { useEffect } from 'react';
 
 export const action = async ({request})=>{
   const formData = await request.formData();
@@ -16,7 +17,8 @@ export const action = async ({request})=>{
 
   try {
    const response =  await customFetch.post("/users/login" , data);
-   console.log(response);
+   
+   localStorage.setItem("token" , response.data.token)
    
     toast.success("Login Successfully")
     if (response?.data?.user?.role === 'admin') {
@@ -37,7 +39,18 @@ export const action = async ({request})=>{
 
 const Login = () => {
   const errors = useActionData();
+  const navigate = useNavigate();
   const navigation = useNavigation();
+  const token  = localStorage.getItem("token")
+
+  useEffect(()=>{
+    if(token){
+      navigate('/dashboard')
+    }else{
+      navigate('/login')
+    }
+
+  } , [])
   
   const isSubmitting = navigation.state === 'submitting'
   return (

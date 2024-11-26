@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import {
   Modal,
   Button,
@@ -12,7 +12,9 @@ import {
   TableHead,
   TableRow,
   Checkbox,
+  IconButton,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 const CreateItemModal = ({ open, onClose, type, onSubmit }) => {
   const availablePermissions = ["users", "roles"]; // Resources (columns)
@@ -128,6 +130,17 @@ const CreateItemModal = ({ open, onClose, type, onSubmit }) => {
           gap: 2,
         }}
       >
+        <IconButton
+          onClick={onClose}
+          sx={{
+            position: "absolute",
+            top: 8,
+            right: 8,
+            color: "text.primary",
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
         {/* Header */}
         <Typography
           variant="h6"

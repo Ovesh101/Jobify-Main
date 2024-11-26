@@ -20,7 +20,11 @@ import { Loading } from "../components";
 const AdminContext = createContext();
 
 const AdminLayout = ({ isDarkThemeEnabled }) => {
-  const { user } = useUser();
+
+  
+  const { user  } = useUser();
+
+
 
   const navigate = useNavigate();
   const navigation = useNavigation();
@@ -31,10 +35,15 @@ const AdminLayout = ({ isDarkThemeEnabled }) => {
 
   useEffect(() => {
     const storedTheme = localStorage.getItem("darkTheme");
+    const token = localStorage.getItem("token")
     if (storedTheme) {
       setIsDarkTheme(storedTheme === "true");
       document.body.classList.toggle("dark-theme", storedTheme === "true");
     }
+    if(!token){
+      navigate("/admin/login")
+    }
+
   }, []);
 
   // Toggle dark theme
@@ -54,8 +63,10 @@ const AdminLayout = ({ isDarkThemeEnabled }) => {
   const logoutUser = async () => {
     try {
       await customFetch.get("/users/logout");
+      localStorage.removeItem("token");
+ 
       toast.success("Logged out successfully...");
-      navigate("/"); // Redirect to login page after logout
+      navigate("/admin/login"); // Redirect to login page after logout
     } catch (error) {
       toast.error("Logout failed. Please try again.");
     }
@@ -66,6 +77,7 @@ const AdminLayout = ({ isDarkThemeEnabled }) => {
       value={{
         user,
         showSidebar,
+    
         isDarkTheme,
         toggleDarkTheme,
         toggleSidebar,
