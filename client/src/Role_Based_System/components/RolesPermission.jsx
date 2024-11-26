@@ -81,6 +81,15 @@ const RolesPermission = () => {
     fetchRoles();
   }, []);
 
+  useEffect(()=>{
+    const loadPermissions = async () => {
+      await PermissionSystem.loadPermissions();
+    };
+
+    loadPermissions();
+
+  } , [roles])
+
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };

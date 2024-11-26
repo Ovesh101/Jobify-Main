@@ -227,7 +227,7 @@ const UsersData = () => {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((SingleUser) => (
                   <TableRow
-                    key={SingleUser.id}
+                    key={SingleUser._id}
                     hover
                     sx={{
                       transition: "background-color 0.3s",
