@@ -250,6 +250,10 @@ Below are some screenshots showcasing the different sections and features of the
 
 ### Deployment Link
 You can access the live version of the **Jobify CMS Dashboard** at the following link:
+> **⚠️ Note:**  
+> Due to the hosting platform, the project might take some time to load initially.  
+> You may need to refresh the page 1-2 times for the best experience.
+
 
 [Jobify CMS Dashboard - Live Demo](https://jobify-main.onrender.com/)
 
