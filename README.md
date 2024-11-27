@@ -168,7 +168,7 @@ Feel free to explore the live demo to see the dashboard's full functionality and
 ## Technical Details
 
 ### Technologies Used
-The **Jobify Admin Dashboard** is built using the following technologies:
+The **Jobify CMS Dashboard** is built using the following technologies:
 
 - **Frontend**:
   - **ReactJS**: A JavaScript library for building user interfaces. It helps in creating dynamic and responsive dashboards.
@@ -199,8 +199,7 @@ The application follows a **client-server** architecture:
 The database is structured with the following key collections:
 1. **Users**: Contains user information such as email, name, role, status (active/inactive), etc.
 2. **Roles**: Stores different roles like Admin, User, etc., along with the associated permissions.
-3. **Permissions**: Defines different types of permissions (view, edit, delete, create) and which roles are allowed to perform them.
-4. **Jobs**: Stores job-related data including job title, description, status, and other details.
+3. **Jobs**: Stores job-related data including job title, description, status, and other details.
 
 ### API Endpoints
 The backend API provides several endpoints for interacting with the data:
