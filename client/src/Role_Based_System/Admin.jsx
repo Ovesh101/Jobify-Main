@@ -22,6 +22,7 @@ const AdminContext = createContext();
 const AdminLayout = ({ isDarkThemeEnabled }) => {
 
   
+  
   const { user  } = useUser();
 
 
@@ -36,6 +37,8 @@ const AdminLayout = ({ isDarkThemeEnabled }) => {
   useEffect(() => {
     const storedTheme = localStorage.getItem("darkTheme");
     const token = localStorage.getItem("token")
+    console.log("use effect called");
+    
     if (storedTheme) {
       setIsDarkTheme(storedTheme === "true");
       document.body.classList.toggle("dark-theme", storedTheme === "true");

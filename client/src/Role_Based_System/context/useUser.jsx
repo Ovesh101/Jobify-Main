@@ -2,16 +2,20 @@ import { createContext, useContext, useState, useEffect } from "react";
 import customFetch from "../../utils/customFetch";
 import { Loading } from "../../components";
 
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+
 
   // Function to fetch current user data
   const fetchCurrentUser = async () => {
     try {
+      setLoading(true)
       const { data } = await customFetch.get("/info/current-user");
+      setLoading(false)
       setUser(data); // Update user data with API response
     } catch (error) {
       console.error("Failed to fetch user data:", error);
@@ -29,7 +33,11 @@ export const AuthProvider = ({ children }) => {
 
   // Fetch user data on component mount
   useEffect(() => {
-    fetchCurrentUser();
+    const token = localStorage.getItem("token")
+    
+
+    fetchCurrentUser()
+   
   }, []);
 
   if (loading) {

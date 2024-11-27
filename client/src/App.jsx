@@ -105,7 +105,7 @@ const router = createBrowserRouter([
                 </Suspense>
               </ProtectedRoute>
             ),
-            errorElement: <NotAuthorized />, // Assign the error handler here
+            
           },
           {
             path: "roles", // Accessible at /admin/dashboard/roles
@@ -116,7 +116,7 @@ const router = createBrowserRouter([
                 </Suspense>
               </ProtectedRoute>
             ),
-            errorElement: <NotAuthorized />, // Assign the error handler here
+           
           },
         ],
       },

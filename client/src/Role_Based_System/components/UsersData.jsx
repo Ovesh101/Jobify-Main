@@ -68,7 +68,7 @@ const UsersData = () => {
         // Sorting based on `createdAt` field (ascending or descending)
         const dateA = new Date(a.createdAt);
         const dateB = new Date(b.createdAt);
-  
+
         if (sortOrder === "asc") {
           return dateA - dateB; // Ascending order
         } else {
@@ -76,24 +76,23 @@ const UsersData = () => {
         }
       });
   }, [users, searchTerm, filterStatus, filterRole, sortOrder]);
-  
+
   // Handler functions for the controls
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
   };
-  
+
   const handleFilterStatusChange = (event) => {
     setFilterStatus(event.target.value);
   };
-  
+
   const handleFilterRoleChange = (event) => {
     setFilterRole(event.target.value);
   };
-  
+
   const handleSortChange = (order = sortOrder) => {
     setSortOrder(order);
   };
-  
 
   // Permission System
   const canCreateUsers = PermissionSystem.hasPermission(
@@ -203,7 +202,7 @@ const UsersData = () => {
   };
 
   const openDeleteDialog = (userId) => {
-    setDeleteUserId(userId);  // Set the user ID to delete
+    setDeleteUserId(userId); // Set the user ID to delete
     setIsDeleteConfirm(true); // Open the dialog
   };
 
@@ -247,7 +246,7 @@ const UsersData = () => {
         </Button>
       )}
       <UserTableControls
-      roleData={roleData}
+        roleData={roleData}
         searchTerm={searchTerm}
         onSearchChange={handleSearchChange}
         filterStatus={filterStatus}
@@ -347,24 +346,32 @@ const UsersData = () => {
                         ) {
                           return (
                             <>
-                              <Tooltip title="Edit User">
-                                <IconButton
-                                  color="primary"
-                                  onClick={() => handleEditUser(SingleUser)}
-                                >
-                                  <EditIcon />
-                                </IconButton>
-                              </Tooltip>
-                              <Tooltip title="Delete User">
-                                <IconButton
-                                  color="error"
-                                  onClick={() =>
-                                    handleDeleteUser(SingleUser._id)
-                                  }
-                                >
-                                  <DeleteIcon />
-                                </IconButton>
-                              </Tooltip>
+                              {canUpdateUsers ? (
+                                <Tooltip title="Edit User">
+                                  <IconButton
+                                    color="primary"
+                                    onClick={() => handleEditUser(SingleUser)}
+                                  >
+                                    <EditIcon />
+                                  </IconButton>
+                                </Tooltip>
+                              ) : (
+                                ""
+                              )}
+                              {canDeleteUsers ? (
+                                        <Tooltip title="Delete User">
+                                        <IconButton
+                                          color="error"
+                                          onClick={() =>
+                                            handleDeleteUser(SingleUser._id)
+                                          }
+                                        >
+                                          <DeleteIcon />
+                                        </IconButton>
+                                      </Tooltip>
+                              ) : ""}
+
+                      
                             </>
                           );
                         } else if (!isTargetUserSuperAdmin) {
@@ -390,6 +397,8 @@ const UsersData = () => {
                               </Tooltip>
                             </>
                           );
+                        } else {
+                          return <div>Protected</div>;
                         }
                       })()}
                     </TableCell>

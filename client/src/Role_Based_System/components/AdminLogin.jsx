@@ -16,7 +16,6 @@ import PermissionSystem from "../auth";
 import { useUser } from "../context/useUser";
 import { useEffect } from "react";
 
-
 export const action = async ({ request }) => {
   const formData = await request.formData();
   const data = Object.fromEntries(formData);
@@ -29,21 +28,33 @@ export const action = async ({ request }) => {
   try {
     const response = await customFetch.post("/users/login", data);
 
-    console.log("response in admin login page" , response.data);
+    console.log("response in admin login page", response.data);
+   
 
-    localStorage.setItem("token" , response.data.token)
-    
+    if (
+      !(
+        PermissionSystem.hasPermission(response.data.user, "users", "view") ||
+        PermissionSystem.hasPermission(response.data.user, "roles", "view")
+      )
+    ) {
+
+ 
+      return redirect("/not-authorized");
+    }
+    localStorage.setItem("token", response.data.token);
 
     if (PermissionSystem.hasPermission(response.data.user, "users", "view")) {
+      console.log("user permission");
+
       return redirect("/admin/dashboard/users");
     }
 
     if (PermissionSystem.hasPermission(response.data.user, "roles", "view")) {
+      console.log("roles permission");
       return redirect("/admin/dashboard/roles");
     }
 
-    // Redirect non-admins to a different dashboard or homepage
-    return redirect("/not-authorized");
+    
   } catch (error) {
     toast.error(error?.response?.data?.msg);
     return error;
@@ -51,27 +62,17 @@ export const action = async ({ request }) => {
 };
 
 const AdminLogin = () => {
- 
-
   const errors = useActionData();
-  const token  = localStorage.getItem("token")
-  console.log("token in local storage" , token);
-  
-  
-
-  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+  console.log("token in local storage", token);
 
   useEffect(()=>{
     if(token){
-      navigate('/admin/dashboard')
-    }else{
-      navigate('/admin/login')
+      navigate("/admin/dashboard")
     }
+  })
 
-  } , [])
-
-
-  
+  const navigate = useNavigate();
 
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";

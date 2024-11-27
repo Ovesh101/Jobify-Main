@@ -21,9 +21,6 @@ export const action = async ({request})=>{
    localStorage.setItem("token" , response.data.token)
    
     toast.success("Login Successfully")
-    if (response?.data?.user?.role === 'admin') {
-      return redirect('/admin/dashboard/users'); // Redirect admins to the default admin route
-    }
 
     // Redirect non-admins to a different dashboard or homepage
     return redirect('/dashboard');

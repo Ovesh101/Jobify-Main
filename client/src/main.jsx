@@ -15,9 +15,7 @@ import "./index.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <AuthProvider>
-      <App />
-      <ToastContainer position="top-center" />
-    </AuthProvider>
+    <App />
+    <ToastContainer position="top-center" />
   </React.StrictMode>
 );
