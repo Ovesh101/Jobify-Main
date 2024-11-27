@@ -10,6 +10,7 @@ Welcome to **Jobify**, a robust project where users can manage jobs, search for 
 - [Project Overview](#project-overview)
 - [Key Features](#key-features)
 - [Setup Instructions](#setup-instructions)
+- [Folder and File Structure](#folder-file-structure)
 - [Usage Guide](#usage-guide)
   - [User Management](#user-management)
   - [Role Management](#role-management)
@@ -60,7 +61,7 @@ Unlike mock API simulations, Jobify incorporates a fully functional backend buil
    - APIs for managing users, roles, permissions, and jobs.
 
 6. **Responsive UI**
-   - Fully responsive design built with **ReactJS** and **TailwindCSS** for a seamless user experience.
+   - Fully responsive design built with **ReactJS**, **TailwindCSS**, and **Material UI** for a seamless user experience.
 
 ---
 
@@ -95,6 +96,8 @@ Ensure you have the following installed:
      npm run dev
    ```
 ---
+
+## Folder and File Structure
 
 ## Usage Guide
 
@@ -140,21 +143,85 @@ You can watch a  demo of the **Jobify CMS Dashboard** and its features in action
 ### Demo Screenshots
 Below are some screenshots showcasing the different sections and features of the dashboard:
 
-1. **User Management Interface**
-   ![User Management Screenshot](https://link-to-your-screenshot.com/user-management.png)  
-   *This screenshot shows the User Management interface where you can view, add, edit, or delete users and assign roles.*
+## User Management Interface
 
-2. **Role Management Interface**
-   ![Role Management Screenshot](https://link-to-your-screenshot.com/role-management.png)  
-   *Here, you can manage roles, assign permissions, and edit role details.*
+### 1. **View Users**  
 
-3. **Permissions Management**
-   ![Permissions Management Screenshot](https://link-to-your-screenshot.com/permissions-management.png)  
+   ![Screenshot (32)](https://github.com/user-attachments/assets/c2d6ace0-acbd-46c8-aacc-18ff3768e00d)
+
+   *This screenshot shows how you can view all users in the User Management interface.*
+
+
+### 2. **Create User**  
+
+ ![Screenshot (33)](https://github.com/user-attachments/assets/897dfe34-7d40-41b1-98ba-6a6abec225cc)
+   *This screenshot demonstrates the process of adding a new user to the system.*
+
+
+### 3. **Edit User**  
+
+   ![Screenshot (34)](https://github.com/user-attachments/assets/1eaa45e1-f4c6-4756-83a1-9463ab2bc550)
+
+   *This screenshot illustrates how you can edit user details, such as name, email, role, and status.*
+
+
+## Role Management Interface
+  ### 1. **View Roles**  
+![Screenshot (35)](https://github.com/user-attachments/assets/f6343295-2d63-4e57-814b-7047f50e419a)
+
+
+   *This screenshot shows how you can view all users in the User Management interface.*
+
+
+### 2. **Create Role, Permission,and Custom Attributes**  
+
+![Screenshot (36)](https://github.com/user-attachments/assets/54a6541f-c98a-4ae8-803b-a7accb2076eb)
+
+   *This screenshot demonstrates the process of adding a new role along with Assign permission to it to the system.*
+
+
+### 3. **Edit Roles**  
+
+
+![Screenshot (37)](https://github.com/user-attachments/assets/91189a61-ff28-428d-8773-578cc170045b)
+
+   *This screenshot illustrates how you can edit role details, such as name, permission, and Custom Attribute*
+
+
+## Permission Management Interface
+![Screenshot (37)](https://github.com/user-attachments/assets/a72b67b9-4e56-487e-ab8d-43ac2dbc185e)![Screenshot (38)](https://github.com/user-attachments/assets/0b57b711-e062-433c-9a7a-a7d4402ebdc2)
+
    *This section allows admins to view and modify permissions for different roles, with the ability to add custom attributes.*
 
-4. **Job Management Interface**
-   ![Job Management Screenshot](https://link-to-your-screenshot.com/job-management.png)  
-   *Job Management interface showing how users can manage and view job listings.*
+## Job Management Interface
+
+  ### 1. **View All Jobs**  
+
+
+![Screenshot (42)](https://github.com/user-attachments/assets/ce6aa05e-f76b-47f5-91e4-4d63bcc65544)
+
+   *This screenshot shows how you can view all Jobs in the Jobs Management interface.*
+
+
+### 2. **Create Jobs**
+
+![Screenshot (41)](https://github.com/user-attachments/assets/5eadd07f-09ca-483e-a57a-d8b906772ae5)
+
+
+   *This screenshot demonstrates the process of adding a new Job along with location and position*
+
+
+### 3. **Edit Jobs**  
+
+![Screenshot (48)](https://github.com/user-attachments/assets/a53100ef-e3d1-484b-9946-73644e58ecc1)
+
+   *This screenshot illustrates how you can edit Job details, such as name, location, and Position*
+   
+
+## Resonsiveness
+  ![Screenshot (46)](https://github.com/user-attachments/assets/d93cf179-d2b8-4a2b-9737-9c4844df436f)
+  ![Screenshot (47)](https://github.com/user-attachments/assets/747866c0-5ff4-498f-877c-02913aa57491)
+
 
 ### Deployment Link
 You can access the live version of the **Jobify CMS Dashboard** at the following link:
@@ -180,7 +247,7 @@ The **Jobify CMS Dashboard** is built using the following technologies:
   - **Node.js**: A JavaScript runtime for the server side. It handles backend logic and API routes.
   - **Express.js**: A lightweight web application framework for Node.js, used to create RESTful APIs.
   - **MongoDB**: A NoSQL database used to store data related to users, roles, permissions, and jobs.
-  - **JWT (JSON Web Tokens)**: For user authentication and authorization. It is used for securely transmitting information between the front end and backend.
+  - **JWT (JSON Web Tokens)**: For user authentication and authorization. It is used for securely transmitting information between the front end and back end.
 
 - **Cloud Storage**:
   - **Cloudinary**: A cloud-based image and video management platform used for handling file uploads in the application.
@@ -203,7 +270,8 @@ The database is structured with the following key collections:
 
 ### API Endpoints
 The backend API provides several endpoints for interacting with the data:
-- **User Management**:
+
+## User Management
   - `GET /api/v1/info/users`: Fetches a list of users.
   - `POST /api/v1/info/users`: Creates a new user.
   - `PUT /api/v1/info/users/:id`: Updates a user’s details.
@@ -223,7 +291,7 @@ The backend API provides several endpoints for interacting with the data:
   Deletes a role and its associated permissions based on the provided role ID.
 
 
-- **Job Management**:
+## Job Management
   - `GET /api/v1/jobs`: Fetches all job listings.
   - `POST /api/v1/jobs`: Creates a new job.
   - `PUT /api/v1/jobs/:id`: Updates job details.
