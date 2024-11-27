@@ -159,7 +159,7 @@ Below are some screenshots showcasing the different sections and features of the
 ### Deployment Link
 You can access the live version of the **Jobify CMS Dashboard** at the following link:
 
-[Jobify CMS Dashboard - Live Demo](https://your-deployment-link.com)
+[Jobify CMS Dashboard - Live Demo](https://jobify-main.onrender.com/)
 
 Feel free to explore the live demo to see the dashboard's full functionality and responsiveness.
 
