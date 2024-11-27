@@ -10,15 +10,13 @@ Welcome to **Jobify**, a robust project where users can manage jobs, search for 
 - [Project Overview](#project-overview)
 - [Key Features](#key-features)
 - [Setup Instructions](#setup-instructions)
-- [Folder and File Structure](#folder-file-structure)
+- [Folder and File Structure](#folder-and-file-structure)
 - [Usage Guide](#usage-guide)
   - [User Management](#user-management)
   - [Role Management](#role-management)
-  - [Permissions Management](#permissions-management)
   - [Job Management](#job-management)
 - [Demo and Deployment](#demo-and-deployment)
 - [Technical Details](#technical-details)
-- [API Endpoints](#api-endpoints)
 
 
 ---
@@ -95,9 +93,37 @@ Ensure you have the following installed:
    ```bash
      npm run dev
    ```
+4. Login Credentials: 
+    ```bash
+    1: Super Admin Credentials:
+        email: oveshmulla1124@gmail.com
+        password: Ovesh@123
+    2: Admin Credentials:
+        email: anas@gmail.com
+        password: Anas@123
+    3: Manager Credentials:
+        email: deep@gmail.com
+        password: Deep@123
 ---
 
 ## Folder and File Structure
+
+Below is the folder and file structure where the role-based access control (RBAC) has been implemented:
+![Screenshot (49)](https://github.com/user-attachments/assets/a592d2ae-d37b-424a-8941-8822014aa2e3)
+
+
+
+### Key Files and Their Roles:
+
+- **`/Role_Based_System/auth.js`**: This file contains the core logic for role-based access control (RBAC) and permission assignment. It dynamically loads roles and permissions from the server and allows checking whether a user has the necessary permissions to perform specific actions.
+
+### Description of `auth.js`:
+
+The `auth.js` file includes the following functionalities:
+
+- **Roles and Permissions Management**: It loads roles and their associated permissions from the server, storing them for use in access control checks.
+- **Custom Attributes**: It supports custom attributes for roles, allowing for more granular control over permissions.
+- **Permission Checking**: It provides methods to check if a user has permission to perform specific actions on resources and whether a user has specific custom attributes.
 
 ## Usage Guide
 
