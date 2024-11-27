@@ -165,6 +165,79 @@ Feel free to explore the live demo to see the dashboard's full functionality and
 
 ---
 
+## Technical Details
+
+### Technologies Used
+The **Jobify Admin Dashboard** is built using the following technologies:
+
+- **Frontend**:
+  - **ReactJS**: A JavaScript library for building user interfaces. It helps in creating dynamic and responsive dashboards.
+  - **Tailwind CSS and Material UI**: A utility-first CSS framework used for styling the front end and making the application responsive.
+  - **React Router**: For routing and navigating between different views in the dashboard.
+  - **Axios**: For making HTTP requests to the backend API.
+
+- **Backend**:
+  - **Node.js**: A JavaScript runtime for the server side. It handles backend logic and API routes.
+  - **Express.js**: A lightweight web application framework for Node.js, used to create RESTful APIs.
+  - **MongoDB**: A NoSQL database used to store data related to users, roles, permissions, and jobs.
+  - **JWT (JSON Web Tokens)**: For user authentication and authorization. It is used for securely transmitting information between the front end and backend.
+
+- **Cloud Storage**:
+  - **Cloudinary**: A cloud-based image and video management platform used for handling file uploads in the application.
+
+- **Authentication**:
+  - **Role-Based Access Control (RBAC)**: An authorization strategy to manage users and their permissions within the system. This is used to ensure that only authorized users can access specific sections of the CMS dashboard.
+
+### Architecture
+The application follows a **client-server** architecture:
+- The **client** (ReactJS) interacts with the **server** (Node.js/Express.js) through HTTP API requests.
+- The **client** sends requests for data (users, roles, permissions, jobs) and the server responds with data from the **MongoDB** database.
+- **JWT** is used for secure authentication, where the front end stores the token and sends it with each API request to authorize the user.
+
+
+### Database Schema
+The database is structured with the following key collections:
+1. **Users**: Contains user information such as email, name, role, status (active/inactive), etc.
+2. **Roles**: Stores different roles like Admin, User, etc., along with the associated permissions.
+3. **Permissions**: Defines different types of permissions (view, edit, delete, create) and which roles are allowed to perform them.
+4. **Jobs**: Stores job-related data including job title, description, status, and other details.
+
+### API Endpoints
+The backend API provides several endpoints for interacting with the data:
+- **User Management**:
+  - `GET /api/v1/info/users`: Fetches a list of users.
+  - `POST /api/v1/info/users`: Creates a new user.
+  - `PUT /api/v1/info/users/:id`: Updates a user’s details.
+  - `DELETE /api/v1/info/users/:id`: Deletes a user.
+
+## Role Management
+- **`GET /api/v1/roles`**  
+  Retrieves a list of all roles along with their associated permissions.
+
+- **`POST /api/v1/roles`**  
+  Creates a new role and assigns the specified permissions.
+
+- **`PUT /api/v1/roles/:id`**  
+  Updates the details and permissions of a specific role by its unique ID.
+
+- **`DELETE /api/v1/roles/:id`**  
+  Deletes a role and its associated permissions based on the provided role ID.
+
+
+- **Job Management**:
+  - `GET /api/v1/jobs`: Fetches all job listings.
+  - `POST /api/v1/jobs`: Creates a new job.
+  - `PUT /api/v1/jobs/:id`: Updates job details.
+  - `DELETE /api/v1/jobs/:id`: Deletes a job .
+
+---
+
+### How It Works
+- When the user logs in, a **JWT** is issued and stored in the browser’s local storage.
+- The JWT is included in the HTTP header when making API requests to authenticate and authorize actions.
+- The frontend interacts with the backend via **Axios** to fetch or send data, and the server communicates with the **MongoDB** database to perform operations on users, roles, jobs, and permissions.
+
+
 
 
 
