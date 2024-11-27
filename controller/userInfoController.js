@@ -99,9 +99,6 @@ export const createUser = async (req, res) => {
     // Hash the password
     req.body.password = await hashPassword(req.body.password);
 
-    // Check if this is the first user
-    const isFirstAccount = (await User.countDocuments()) === 0;
-    req.body.role = isFirstAccount ? "admin" : "user";
 
     // Create the user
     const user = await User.create(req.body);
@@ -121,7 +118,7 @@ export const updateUserInfo = async (req, res) => {
     const userId = req.params.id; // User ID to be updated
     const updatedData = req.body; // Data to update the user with
 
-    console.log("updated data" , updatedData);
+ 
     
 
     // Find the user by ID

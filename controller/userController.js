@@ -17,7 +17,7 @@ const login = async (req, res) => {
   // check if user exists
   // check if password is correct
 
-  console.log("body data" , req.body);
+
   
 
   const user = await User.findOne({ email: req.body.email });

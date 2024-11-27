@@ -202,6 +202,11 @@ const UsersData = () => {
     }
   };
 
+  const openDeleteDialog = (userId) => {
+    setDeleteUserId(userId);  // Set the user ID to delete
+    setIsDeleteConfirm(true); // Open the dialog
+  };
+
   const handleCreateUser = async (formData) => {
     try {
       const response = await customFetch.post("/info/users", formData);
@@ -377,7 +382,7 @@ const UsersData = () => {
                                 <IconButton
                                   color="error"
                                   onClick={() =>
-                                    handleDeleteUser(SingleUser._id)
+                                    openDeleteDialog(SingleUser._id)
                                   }
                                 >
                                   <DeleteIcon />

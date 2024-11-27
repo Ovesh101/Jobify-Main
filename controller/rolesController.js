@@ -154,6 +154,9 @@ export const editRole = async (req, res) => {
 
 export const deleteRole = async (req, res) => {
     try {
+
+    
+      
       // Extract the role ID from the request parameters
       const { id } = req.params;
   

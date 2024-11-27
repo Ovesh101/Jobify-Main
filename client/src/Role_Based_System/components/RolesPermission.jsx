@@ -161,6 +161,11 @@ const RolesPermission = () => {
     }
   };
 
+  const openDeleteDialog = (roleId) => {
+    setDeleteRoleId(roleId);  // Set the user ID to delete
+    setIsDeleteConfirm(true); // Open the dialog
+  };
+
   const handleCreateRole = async (formData) => {
     try {
       const response = await customFetch.post("/roles", formData);
@@ -272,16 +277,7 @@ const RolesPermission = () => {
                     <TableRow key={role._id} hover>
                       <TableCell>
                         <Box display="flex" alignItems="center">
-                          <IconButton
-                            onClick={() => toggleRow(role._id)}
-                            size="small"
-                          >
-                            {openRows[role._id] ? (
-                              <KeyboardArrowUp />
-                            ) : (
-                              <KeyboardArrowDown />
-                            )}
-                          </IconButton>
+ 
                           <span className="ml-2">{role.role}</span>
                         </Box>
                       </TableCell>
@@ -293,6 +289,16 @@ const RolesPermission = () => {
                           : `${
                               Object.keys(role.permissions || {}).length
                             } Permissions`}
+                                                      <IconButton
+                            onClick={() => toggleRow(role._id)}
+                            size="small"
+                          >
+                            {openRows[role._id] ? (
+                              <KeyboardArrowUp />
+                            ) : (
+                              <KeyboardArrowDown />
+                            )}
+                          </IconButton>
                       </TableCell>
 
                       {/* Actions */}
@@ -314,7 +320,7 @@ const RolesPermission = () => {
                                 <IconButton
                                   color="error"
                                   onClick={() => {
-                                    // Add your delete logic here
+                                    openDeleteDialog(role._id)
                                   }}
                                 >
                                   <DeleteIcon />
@@ -423,6 +429,7 @@ const RolesPermission = () => {
         />
       </TableContainer>
 
+{/* Edit Modal */}
       <Modal open={openModal} onClose={() => setOpenModal(false)}>
         <Box
           sx={{
