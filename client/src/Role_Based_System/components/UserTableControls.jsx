@@ -1,10 +1,10 @@
-import React from 'react';
-import { TextField, InputAdornment, MenuItem, Grid } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import { useAdminContext } from '../Admin';
+import React from "react";
+import { TextField, Stack, Box, InputAdornment, MenuItem } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import { useAdminContext } from "../Admin";
 
 const UserTableControls = ({
-  roleData,  // Dynamically passed role data
+  roleData, // Dynamically passed role data
   searchTerm,
   onSearchChange,
   filterStatus,
@@ -12,24 +12,30 @@ const UserTableControls = ({
   filterRole,
   onFilterRoleChange,
   sortOrder,
-  onSortChange
+  onSortChange,
 }) => {
   const { isDarkTheme } = useAdminContext();
 
   return (
     <div
       style={{
-      
-        color: isDarkTheme ? '#fff' : '#000',
-        padding: '20px',
-        marginBottom:"20px",
-        borderRadius: '8px',
-        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
+        backgroundColor: isDarkTheme ? "#1e1e1e" : "#fff",
+        color: isDarkTheme ? "#e0e0e0" : "#000",
+        padding: "20px",
+        marginBottom: "20px",
+        borderRadius: "8px",
+        boxShadow: isDarkTheme
+          ? "0px 4px 6px rgba(0, 0, 0, 0.5)"
+          : "0px 4px 6px rgba(0, 0, 0, 0.1)",
       }}
     >
-      <Grid container spacing={2} alignItems="center">
+      <Stack
+        spacing={2}
+        direction={{ xs: "column", sm: "row" }}
+        alignItems="center"
+      >
         {/* Search Bar */}
-        <Grid item xs={12} sm={3}>
+        <Box sx={{ flex: 1 }}>
           <TextField
             variant="outlined"
             placeholder="Search"
@@ -43,33 +49,40 @@ const UserTableControls = ({
               ),
             }}
             sx={{
-              width: '100%',
-              backgroundColor: isDarkTheme ? '#555' : '#f0f0f0',
-              '& .MuiOutlinedInput-root': {
-                borderColor: isDarkTheme ? '#555' : '#ccc',
+              width: "100%",
+              backgroundColor: isDarkTheme ? "#2e2e2e" : "#f7f7f7",
+              "& .MuiOutlinedInput-root": {
+                borderColor: isDarkTheme ? "#555" : "#ccc",
+                color: isDarkTheme ? "#fff" : "#000",
               },
-              '& .MuiInputLabel-root': {
-                fontSize: '0.875rem',  // Smaller text
+              "& .MuiOutlinedInput-root.Mui-focused": {
+                borderColor: isDarkTheme ? "#aaa" : "#000",
+              },
+              "& .MuiInputLabel-root": {
+                color: isDarkTheme ? "#aaa" : "#666",
+                fontSize: "0.875rem",
               },
             }}
           />
-        </Grid>
+        </Box>
 
         {/* Status Filter */}
-        <Grid item xs={6} sm={2}>
+        <Box sx={{ flex: 1 }}>
           <TextField
             select
             label="Status"
             value={filterStatus}
             onChange={onFilterStatusChange}
             sx={{
-              width: '100%',
-              backgroundColor: isDarkTheme ? '#555' : '#f0f0f0',
-              '& .MuiOutlinedInput-root': {
-                borderColor: isDarkTheme ? '#555' : '#ccc',
+              width: "100%",
+              backgroundColor: isDarkTheme ? "#2e2e2e" : "#f7f7f7",
+              "& .MuiOutlinedInput-root": {
+                borderColor: isDarkTheme ? "#555" : "#ccc",
+                color: isDarkTheme ? "#fff" : "#000",
               },
-              '& .MuiInputLabel-root': {
-                fontSize: '0.875rem',  // Smaller text
+              "& .MuiInputLabel-root": {
+                color: isDarkTheme ? "#aaa" : "#666",
+                fontSize: "0.875rem",
               },
             }}
           >
@@ -77,28 +90,29 @@ const UserTableControls = ({
             <MenuItem value="Active">Active</MenuItem>
             <MenuItem value="Inactive">Inactive</MenuItem>
           </TextField>
-        </Grid>
+        </Box>
 
         {/* Role Filter */}
-        <Grid item xs={6} sm={3}>
+        <Box sx={{ flex: 1 }}>
           <TextField
             select
             label="Role"
             value={filterRole}
             onChange={onFilterRoleChange}
             sx={{
-              width: '100%',
-              backgroundColor: isDarkTheme ? '#555' : '#f0f0f0',
-              '& .MuiOutlinedInput-root': {
-                borderColor: isDarkTheme ? '#555' : '#ccc',
+              width: "100%",
+              backgroundColor: isDarkTheme ? "#2e2e2e" : "#f7f7f7",
+              "& .MuiOutlinedInput-root": {
+                borderColor: isDarkTheme ? "#555" : "#ccc",
+                color: isDarkTheme ? "#fff" : "#000",
               },
-              '& .MuiInputLabel-root': {
-                fontSize: '0.875rem',  // Smaller text
+              "& .MuiInputLabel-root": {
+                color: isDarkTheme ? "#aaa" : "#666",
+                fontSize: "0.875rem",
               },
             }}
           >
             <MenuItem value="">All</MenuItem>
-            {/* Ensure roleData is an array and is populated */}
             {roleData && roleData.length > 0 ? (
               roleData.map((role) => (
                 <MenuItem key={role.role._id} value={role.role}>
@@ -106,34 +120,38 @@ const UserTableControls = ({
                 </MenuItem>
               ))
             ) : (
-              <MenuItem value="" disabled>No roles available</MenuItem>
+              <MenuItem value="" disabled>
+                No roles available
+              </MenuItem>
             )}
           </TextField>
-        </Grid>
+        </Box>
 
         {/* Sort Order */}
-        <Grid item xs={6} sm={2}>
+        <Box sx={{ flex: 1 }}>
           <TextField
             select
             label="Sort Order"
             value={sortOrder}
             onChange={(e) => onSortChange(e.target.value)}
             sx={{
-              width: '100%',
-              backgroundColor: isDarkTheme ? '#555' : '#f0f0f0',
-              '& .MuiOutlinedInput-root': {
-                borderColor: isDarkTheme ? '#555' : '#ccc',
+              width: "100%",
+              backgroundColor: isDarkTheme ? "#2e2e2e" : "#f7f7f7",
+              "& .MuiOutlinedInput-root": {
+                borderColor: isDarkTheme ? "#555" : "#ccc",
+                color: isDarkTheme ? "#fff" : "#000",
               },
-              '& .MuiInputLabel-root': {
-                fontSize: '0.875rem',  // Smaller text
+              "& .MuiInputLabel-root": {
+                color: isDarkTheme ? "#aaa" : "#666",
+                fontSize: "0.875rem",
               },
             }}
           >
             <MenuItem value="asc">Ascending</MenuItem>
             <MenuItem value="desc">Descending</MenuItem>
           </TextField>
-        </Grid>
-      </Grid>
+        </Box>
+      </Stack>
     </div>
   );
 };
