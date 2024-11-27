@@ -162,9 +162,8 @@ The **Jobify CMS Dashboard** provides an easy-to-use interface for managing user
 
 ### Demo Video
 You can watch a  demo of the **Jobify CMS Dashboard** and its features in action.
+https://drive.google.com/file/d/1HbhdS46edJikQ27dEikdS-mJAdcV1QZG/view?usp=sharing
 
-[![Jobify Demo Video](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)  
-*Click the video above to watch the demo.*
 
 ### Demo Screenshots
 Below are some screenshots showcasing the different sections and features of the dashboard:
