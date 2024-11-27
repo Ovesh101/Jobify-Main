@@ -32,10 +32,11 @@ const UserTableControls = ({
       <Stack
         spacing={2}
         direction={{ xs: "column", sm: "row" }}
-        alignItems="center"
+        justifyContent="space-between"
+        alignItems={{ xs: "stretch", sm: "center" }}
       >
         {/* Search Bar */}
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, width: "100%" }}>
           <TextField
             variant="outlined"
             placeholder="Search"
@@ -67,7 +68,7 @@ const UserTableControls = ({
         </Box>
 
         {/* Status Filter */}
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, width: "100%" }}>
           <TextField
             select
             label="Status"
@@ -93,7 +94,7 @@ const UserTableControls = ({
         </Box>
 
         {/* Role Filter */}
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, width: "100%" }}>
           <TextField
             select
             label="Role"
@@ -128,7 +129,7 @@ const UserTableControls = ({
         </Box>
 
         {/* Sort Order */}
-        <Box sx={{ flex: 1 }}>
+        <Box sx={{ flex: 1, width: "100%" }}>
           <TextField
             select
             label="Sort Order"
