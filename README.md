@@ -78,17 +78,25 @@ Ensure you have the following installed:
    git clone https://github.com/Ovesh101/Jobify-Main.git
    cd Jobify-Main
    npm run setup-project
-2: Add .env variable inside the Jobify-Main:
+   ```
+  
+2. Add .env variable inside the Jobify-Main:
   ```bash
-      PORT=5000
-      NODE_ENV=devolopment
-      MONGO_URL=mongodb+srv://Ovesh786:123@cluster101.w6vis1s.mongodb.net/JOBIFY?retryWrites=true&w=majority
-      JWT_SECRET=secret
-      JWT_EXPIRES_IN=1d
-      CLOUD_NAME=de7savung
-      CLOUD_API_KEY=914669372435349
-      CLOUD_API_SECRET=1-oeqks9ggJdXZmOpBrlcRZOizk
-3: Run Fronted and backend: npm run dev
+PORT=5000
+NODE_ENV=devolopment
+MONGO_URL=mongodb+srv://Ovesh786:123@cluster101.w6vis1s.mongodb.net/JOBIFY?retryWrites=true&w=majority
+JWT_SECRET=secret
+JWT_EXPIRES_IN=1d
+CLOUD_NAME=de7savung
+CLOUD_API_KEY=914669372435349
+CLOUD_API_SECRET=1-oeqks9ggJdXZmOpBrlcRZOizk
+  ```
+3. Run The Fronted and Server Both:
+   ```bash
+     npm run dev
+   ```
+
+
 
 
 
