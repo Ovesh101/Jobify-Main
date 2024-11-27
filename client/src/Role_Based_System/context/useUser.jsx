@@ -7,13 +7,13 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
 
   // Function to fetch current user data
   const fetchCurrentUser = async () => {
     try {
-      setLoading(true)
+      
       const { data } = await customFetch.get("/info/current-user");
       setLoading(false)
       setUser(data); // Update user data with API response
@@ -33,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
   // Fetch user data on component mount
   useEffect(() => {
-    const token = localStorage.getItem("token")
+  
     
 
     fetchCurrentUser()
