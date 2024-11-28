@@ -14,12 +14,13 @@ import {
 import { validateRegisterInput, validateUpdateUserInput } from '../middleware/validationMiddleware.js';
 
 import upload from "../middleware/multerMiddleware.js"
+import { authorizedPermission } from '../middleware/authMiddleware.js';
 
 router.get('/current-user',  getCurrentUser);
-router.get('/users',   getAllUsers);
-router.delete('/users/:id',   deleteUser);
-router.patch('/users/:id',    updateUserInfo);
-router.post('/users', validateRegisterInput ,    createUser);
+router.get('/users', authorizedPermission("users", "view"),   getAllUsers);
+router.delete('/users/:id', authorizedPermission("users", "delete"),    deleteUser);
+router.patch('/users/:id',  authorizedPermission("users", "update"),   updateUserInfo);
+router.post('/users', authorizedPermission("users", "create"),  validateRegisterInput ,     createUser);
 router.get('/admin/app-stats', getApplicationStats);
 router.patch('/update-user' ,  upload.single('avatar')  , validateUpdateUserInput, updateUser);
 export default router;

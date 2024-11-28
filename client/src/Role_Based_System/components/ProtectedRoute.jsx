@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigate, redirect, useRouteError } from "react-router-dom";
+import { Navigate } from "react-router-dom";  // Use Navigate instead of redirect
 import PermissionSystem from "../auth";
 import { useUser } from "../context/useUser";
 
@@ -9,9 +9,10 @@ const ProtectedRoute = ({ children, resource, action, fallback = "/not-authorize
   // Check if the user has the required permission
   const hasPermission = PermissionSystem.hasPermission(user?.user, resource, action);
 
-  // If permission is missing, throw a 401 error
+  // If permission is missing, redirect to the fallback page
   if (!hasPermission) {
-    return redirect(fallback)
+    console.log("Access denied to view users, redirecting to not-authorized...");
+    return <Navigate to={fallback} />;  // Correct way to redirect in React Router v6+
   }
 
   // If permission exists, render the children
