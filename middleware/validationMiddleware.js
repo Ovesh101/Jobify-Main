@@ -4,7 +4,7 @@ import {
   UnauthorizedError,
 } from "../errors/customError.js";
 import { body, param, validationResult } from "express-validator";
-import { JOB_STATUS, JOB_TYPE, ROLE } from "../utils/constant.js";
+import { JOB_STATUS, JOB_TYPE } from "../utils/constant.js";
 import Job from "../models/JobModel.js";
 import User from "../models/UserModel.js";
 import mongoose from "mongoose";
@@ -59,33 +59,42 @@ export const validateRegisterInput = withValidationError([
   body("name")
     .notEmpty()
     .withMessage("Please Provide name")
-    .isLength({ min: 3, max: 20 }),
+    .bail() // Stops further validations if this rule fails
+    .isLength({ min: 3, max: 20 })
+    .withMessage("Name must be between 3 and 20 characters"),
   body("email")
     .notEmpty()
     .withMessage("Please Provide Email")
+    .bail()
     .isEmail()
     .withMessage("Invalid Email")
+    .bail()
     .custom(async (email) => {
       const user = await User.findOne({ email });
       if (user) {
-        throw new BadRequestError("Email already exist..");
+        throw new BadRequestError("Email already exists.");
       }
     }),
   body("password")
     .notEmpty()
-    .withMessage("Please Provide name")
+    .withMessage("Please Provide Password")
+    .bail()
     .isLength({ min: 8 })
-    .withMessage("Password must be atleast 8 character long.."),
+    .withMessage("Password must be at least 8 characters long"),
   body("lastName")
     .notEmpty()
-    .withMessage("Please Provide last name")
-    .isLength({ min: 4, max: 20 }),
+    .withMessage("Please Provide Last Name")
+    .bail()
+    .isLength({ min: 4, max: 20 })
+    .withMessage("Last Name must be between 4 and 20 characters"),
   body("location")
     .notEmpty()
     .withMessage("Please Provide Location")
-    .isLength({ min: 4, max: 20 }),
-  // body('role').isIn(Object.values(ROLE)).withMessage("Invalid  Credentials..")
+    .bail()
+    .isLength({ min: 4, max: 20 })
+    .withMessage("Location must be between 4 and 20 characters"),
 ]);
+
 
 export const validateLoginInput = withValidationError([
   body("email")

@@ -51,6 +51,25 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
+export const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params; // Get the user ID from the URL parameters
+    const user = await User.findById(id); // Find user by ID
+
+    if (!user) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ msg: "User not found" });
+    }
+
+    res.status(StatusCodes.OK).json({ user });
+  } catch (error) {
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ msg: "Error fetching user", error });
+  }
+};
+
 export const deleteUser = async (req, res) => {
   try {
     const userId = req.params.id; // User ID to be deleted

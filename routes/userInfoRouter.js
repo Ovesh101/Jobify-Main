@@ -10,6 +10,7 @@ import {
   deleteUser,
   createUser,
   updateUserInfo,
+  getUserById,
 } from "../controller/userInfoController.js"
 import { validateRegisterInput, validateUpdateUserInput } from '../middleware/validationMiddleware.js';
 
@@ -17,6 +18,7 @@ import upload from "../middleware/multerMiddleware.js"
 import { authorizedPermission } from '../middleware/authMiddleware.js';
 
 router.get('/current-user',  getCurrentUser);
+router.get('/users/:id',  getUserById);
 router.get('/users', authorizedPermission("users", "view"),   getAllUsers);
 router.delete('/users/:id', authorizedPermission("users", "delete"),    deleteUser);
 router.patch('/users/:id',  authorizedPermission("users", "update"),   updateUserInfo);
